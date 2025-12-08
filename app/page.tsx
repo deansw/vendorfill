@@ -1,4 +1,4 @@
-// app/page.tsx
+// app/page.tsx — FINAL VENDORFILL AI HOMEPAGE (Dec 2025)
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Check } from "lucide-react"
@@ -50,17 +50,17 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold mb-12">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-10">
             <div className="text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">1</div>
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl font-bold">1</div>
               <h3 className="text-2xl font-semibold mb-3">Build Your Profile Once</h3>
               <p className="text-gray-600">Company info, tax ID, bank, insurance — saved forever.</p>
             </div>
             <div className="text-center">
-              <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">2</div>
+              <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl font-bold">2</div>
               <h3 className="text-2xl font-semibold mb-3">Upload Any Packet</h3>
               <p className="text-gray-600">Walmart, Boeing, Amazon, hospitals, government — we handle them all.</p>
             </div>
             <div className="text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">3</div>
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl font-bold">3</div>
               <h3 className="text-2xl font-semibold mb-3">Get Filled PDF Instantly</h3>
               <p className="text-gray-600">Claude + Grok fill every field. Download or email.</p>
             </div>
