@@ -1,6 +1,6 @@
-// app/api/fill/route.ts — FIXED: PROPER MESSAGEPARAM TYPING
+// app/api/fill/route.ts — FIXED: ANY TYPE FOR MESSAGES (NO EXPORT ERROR)
 import { NextRequest } from "next/server"
-import Anthropic, { MessageParam } from "@anthropic-ai/sdk"
+import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
 const anthropic = new Anthropic({
@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Use MessageParam type for messages array
-    const messages: MessageParam[] = [
+    // FIXED: Use any[] for messages (no named export needed)
+    const messages: any[] = [
       {
         role: "user",
         content: `Fill this vendor form using ONLY the data below.
