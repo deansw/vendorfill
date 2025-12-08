@@ -1,6 +1,6 @@
-// app/api/fill/route.ts — FIXED: STANDARD MESSAGES.CREATE WITH BETA HEADER
+// app/api/fill/route.ts — FIXED: PROPER MESSAGEPARAM TYPING
 import { NextRequest } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
+import Anthropic, { MessageParam } from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
 const anthropic = new Anthropic({
@@ -30,17 +30,11 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    const completion = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 4096,
-      temperature: 0,
-      extraHeaders: {
-        "anthropic-beta": "messages-2024-10-21", // Beta header for Sonnet 3.5
-      },
-      messages: [
-        {
-          role: "user",
-          content: `Fill this vendor form using ONLY the data below.
+    // FIXED: Use MessageParam type for messages array
+    const messages: MessageParam[] = [
+      {
+        role: "user",
+        content: `Fill this vendor form using ONLY the data below.
 
 Company Data:
 ${JSON.stringify(mockProfile, null, 2)}
@@ -50,11 +44,17 @@ ${fieldNames.join("\n")}
 
 Output ONLY valid JSON with field name as key and value as string.
 Never hallucinate. Use "N/A" if unsure.`,
-        },
-      ],
+      },
+    ]
+
+    const completion = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 4096,
+      temperature: 0,
+      messages,
     })
 
-    // FIXED: Cast to access .text (ContentBlock type)
+    // FIXED: Cast content[0] to access .text
     const filledText = (completion.content[0] as any).text
     const filledData = JSON.parse(filledText)
 
