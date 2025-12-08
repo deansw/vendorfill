@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { Coins, UserCheck, Database, FileText, Zap, Shield } from "lucide-react"
+import { Coins, UserCheck, Database, FileText, Zap, Shield, Check } from "lucide-react"
 
 export default function LandingPage() {
   return (
