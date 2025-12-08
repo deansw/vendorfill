@@ -1,4 +1,4 @@
-// app/profile/page.tsx — FIXED: VERTICALLY STACKED FIELDS
+// app/profile/page.tsx — FIXED SYNTAX & VERTICAL STACK
 "use client"
 import { useState } from "react"
 
@@ -54,4 +54,35 @@ export default function Profile() {
           <input
             placeholder="Bank Routing"
             value={data.bankRouting}
-            onChange={(e) => update
+            onChange={(e) => updateField("bankRouting", e.target.value)}
+            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+          <input
+            placeholder="Accounting Email"
+            type="email"
+            value={data.accountingEmail}
+            onChange={(e) => updateField("accountingEmail", e.target.value)}
+            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+          <input
+            placeholder="Sales Email"
+            type="email"
+            value={data.salesEmail}
+            onChange={(e) => updateField("salesEmail", e.target.value)}
+            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+          <button
+            onClick={saveProfile}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            style={{
+              background: "linear-gradient(to right, #2563eb, #3b82f6)",
+              boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
+            }}
+          >
+            Save Profile →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
