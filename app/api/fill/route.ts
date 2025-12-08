@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — FIXED: BETA METHOD + TYPE CASTING
+// app/api/fill/route.ts — FIXED: STANDARD MESSAGES.CREATE WITH BETA HEADER
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
@@ -30,10 +30,13 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    const completion = await anthropic.beta.messages.create({
+    const completion = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       temperature: 0,
+      extraHeaders: {
+        "anthropic-beta": "messages-2024-10-21", // Beta header for Sonnet 3.5
+      },
       messages: [
         {
           role: "user",
@@ -49,7 +52,6 @@ Output ONLY valid JSON with field name as key and value as string.
 Never hallucinate. Use "N/A" if unsure.`,
         },
       ],
-      betas: ["messages-2024-10-21"], // Required for Sonnet 3.5
     })
 
     // FIXED: Cast to access .text (ContentBlock type)
