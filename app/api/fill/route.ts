@@ -1,6 +1,7 @@
-// app/api/fill/route.ts — FIXED: TYPED MESSAGES REQUEST
+// app/api/fill/route.ts — FIXED: TYPE IMPORT + CASTING
 import { NextRequest } from "next/server"
-import Anthropic, { MessageCreateParams } from "@anthropic-ai/sdk"
+import Anthropic from "@anthropic-ai/sdk"
+import type { MessageCreateParams } from "@anthropic-ai/sdk" // FIXED: Type import only
 import { PDFDocument } from "pdf-lib"
 
 const anthropic = new Anthropic({
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Use MessageCreateParams type for the request
+    // FIXED: Use MessageCreateParams for typing
     const params: MessageCreateParams = {
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
@@ -54,7 +55,7 @@ Never hallucinate. Use "N/A" if unsure.`,
 
     const completion = await anthropic.messages.create(params)
 
-    // FIXED: Cast content[0] to access .text
+    // FIXED: Cast content[0] to access .text (ContentBlock type)
     const filledText = (completion.content[0] as any).text
     const filledData = JSON.parse(filledText)
 
