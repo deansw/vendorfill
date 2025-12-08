@@ -1,4 +1,4 @@
-// app/profile/page.tsx — COMPLETE & FINAL VERSION
+// app/profile/page.tsx — FIXED: VERTICALLY STACKED WITH LABELS ABOVE
 "use client"
 import { useState } from "react"
 
@@ -27,54 +27,65 @@ export default function Profile() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-8 text-center">
           Your Company Profile
         </h1>
-        <p className="text-xl text-gray-600 mb-12 text-center">
-          Fill this once — we’ll use it to auto-fill every vendor packet forever.
+        <p className="text-xl text-gray-600 mb-12 text-center max-w-xl mx-auto">
+          Fill this once — we'll use it to auto-fill every vendor packet forever.
         </p>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-8">
-          {/* ALL FIELDS ARE FULL-WIDTH & VERTICALLY STACKED */}
-          <input
-            type="text"
-            placeholder="Company Name"
-            value={data.companyName}
-            onChange={(e) => updateField("companyName", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
-          <input
-            type="password"
-            placeholder="Tax ID / EIN"
-            value={data.taxId}
-            onChange={(e) => updateField("taxId", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
-          <input
-            type="password"
-            placeholder="Bank Account Number"
-            value={data.bankAccount}
-            onChange={(e) => updateField("bankAccount", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
-          <input
-            type="text"
-            placeholder="Bank Routing Number"
-            value={data.bankRouting}
-            onChange={(e) => updateField("bankRouting", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
-          <input
-            type="email"
-            placeholder="Accounting Contact Email"
-            value={data.accountingEmail}
-            onChange={(e) => updateField("accountingEmail", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
-          <input
-            type="email"
-            placeholder="Sales Contact Email"
-            value={data.salesEmail}
-            onChange={(e) => updateField("salesEmail", e.target.value)}
-            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
-          />
+        <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-6">
+          {/* VERTICALLY STACKED FIELDS WITH LABELS ABOVE */}
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Company Name</label>
+            <input
+              type="text"
+              value={data.companyName}
+              onChange={(e) => updateField("companyName", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Tax ID / EIN</label>
+            <input
+              type="password"
+              value={data.taxId}
+              onChange={(e) => updateField("taxId", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Bank Account Number</label>
+            <input
+              type="password"
+              value={data.bankAccount}
+              onChange={(e) => updateField("bankAccount", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Bank Routing Number</label>
+            <input
+              type="text"
+              value={data.bankRouting}
+              onChange={(e) => updateField("bankRouting", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Accounting Contact Email</label>
+            <input
+              type="email"
+              value={data.accountingEmail}
+              onChange={(e) => updateField("accountingEmail", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-semibold text-gray-700">Sales Contact Email</label>
+            <input
+              type="email"
+              value={data.salesEmail}
+              onChange={(e) => updateField("salesEmail", e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
 
           {/* BIG BLUE BUTTON — SAME AS HOMEPAGE */}
           <button
