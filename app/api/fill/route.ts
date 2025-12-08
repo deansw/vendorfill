@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — FIXED: ANY PARAMS FOR COMPILATION
+// app/api/fill/route.ts — FIXED: ANY CAST FOR CLIENT
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Use any for params (bypasses type strictness)
-    const params = {
+    // FIXED: Cast anthropic as any to bypass type error
+    const completion = await (anthropic as any).messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       temperature: 0,
@@ -50,9 +50,7 @@ Output ONLY valid JSON with field name as key and value as string.
 Never hallucinate. Use "N/A" if unsure.`,
         },
       ],
-    }
-
-    const completion = await anthropic.messages.create(params)
+    })
 
     // FIXED: Cast content[0] to access .text
     const filledText = (completion.content[0] as any).text
