@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx — FINAL VERSION (BIG BLUE BUTTON)
 import Link from "next/link"
 
 export default function Dashboard() {
@@ -9,7 +8,6 @@ export default function Dashboard() {
           Welcome back!
         </h1>
 
-        {/* THIS IS NOW A BIG BEAUTIFUL BUTTON */}
         <Link
           href="/upload"
           className="inline-block bg-blue-600 text-white px-12 py-6 rounded-xl text-2xl font-bold hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all"
