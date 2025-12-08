@@ -1,4 +1,3 @@
-// app/page.tsx — PROFESSIONAL STYLING VERSION
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Check } from "lucide-react"
@@ -11,7 +10,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="gradient-bg min-h-screen">
+    <div className="gradient-hero min-h-screen">
       {/* Header */}
       <header className="fixed inset-x-0 top-0 z-50 border-b bg-white/95 backdrop-blur-md">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
@@ -26,80 +25,74 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="pt-32 pb-24 text-center">
-        <div className="max-w-5xl mx-auto px-6">
-          <h1 className="text-hero lg:text-7xl mb-8">
-            Never Fill Out Another<br />Vendor Form Manually
-          </h1>
-          <p className="mx-auto max-w-3xl text-xl text-gray-600 leading-relaxed">
-            Upload any supplier packet — get back a perfectly filled + signed PDF in under 10 minutes.
-          </p>
-          <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
-            <Button className="btn-primary text-lg px-10 py-4" href="/login">
-              Start Free →
-            </Button>
-            <div className="flex gap-8 text-sm text-gray-600">
-              <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> No credit card</span>
-              <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> Cancel anytime</span>
-            </div>
+      <section className="hero-section">
+        <h1 className="hero-h1">
+          Never Fill Out Another<br />Vendor Form Manually
+        </h1>
+        <p className="hero-p">
+          Upload any supplier packet — get back a perfectly filled + signed PDF in under 10 minutes.
+        </p>
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center mt-10">
+          <Button className="btn-primary text-lg px-10 py-4" href="/login">
+            Start Free →
+          </Button>
+          <div className="flex gap-8 text-sm text-gray-600">
+            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> No credit card</span>
+            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> Cancel anytime</span>
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="bg-gray-50 py-24">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-16 md:text-5xl">How It Works</h2>
-          <div className="grid gap-12 md:grid-cols-3">
-            {[
-              { step: "1", title: "Build Your Profile Once", desc: "Company info, tax ID, bank, insurance — saved forever." },
-              { step: "2", title: "Upload Any Packet", desc: "Walmart, Boeing, Amazon, hospitals, government — we handle them all." },
-              { step: "3", title: "Get Filled PDF Instantly", desc: "Claude + Grok fill every field. Download or email." },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-4xl font-bold text-blue-600">
-                  {item.step}
-                </div>
-                <h3 className="mb-4 text-2xl font-bold text-gray-900">{item.title}</h3>
-                <p className="text-lg text-gray-600">{item.desc}</p>
+      <section className="section bg-gray-50">
+        <h2 className="text-center text-4xl font-bold text-gray-900 mb-16 md:text-5xl">How It Works</h2>
+        <div className="grid gap-12 md:grid-cols-3">
+          {[
+            { step: "1", title: "Build Your Profile Once", desc: "Company info, tax ID, bank, insurance — saved forever." },
+            { step: "2", title: "Upload Any Packet", desc: "Walmart, Boeing, Amazon, hospitals, government — we handle them all." },
+            { step: "3", title: "Get Filled PDF Instantly", desc: "Claude + Grok fill every field. Download or email." },
+          ].map((item) => (
+            <div key={item.step} className="step-card">
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-4xl font-bold text-blue-600">
+                {item.step}
               </div>
-            ))}
-          </div>
+              <h3 className="text-2xl font-bold text-gray-900">{item.title}</h3>
+              <p className="text-lg text-gray-600">{item.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 md:text-5xl">Pay-Per-Packet Pricing</h2>
-          <p className="text-xl text-gray-600 mb-16">No subscription. Only pay when you win a contract.</p>
-          <div className="grid gap-8 md:grid-cols-3">
-            {tiers.map((tier) => (
-              <div key={tier.name} className={`card relative ${tier.popular ? 'border-blue-600 shadow-xl ring-2 ring-blue-200' : ''}`}>
-                {tier.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white">
-                    MOST POPULAR
-                  </div>
-                )}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{tier.name}</h3>
-                <p className="text-5xl font-black text-gray-900 mb-2">
-                  {tier.price}<span className="text-lg font-normal text-gray-600">/packet</span>
-                </p>
-                <p className="text-gray-600 mb-8">{tier.desc}</p>
-                <ul className="space-y-4 mb-8 text-left">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-center gap-3">
-                      <Check className="h-5 w-5 text-green-600" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button className="w-full btn-primary text-lg py-3" href="/login">
-                  Get Started
-                </Button>
-              </div>
-            ))}
-          </div>
+      <section className="section">
+        <h2 className="text-center text-4xl font-bold text-gray-900 mb-4 md:text-5xl">Pay-Per-Packet Pricing</h2>
+        <p className="text-center text-xl text-gray-600 mb-16">No subscription. Only pay when you win a contract.</p>
+        <div className="grid gap-8 md:grid-cols-3">
+          {tiers.map((tier) => (
+            <div key={tier.name} className={`pricing-card ${tier.popular ? 'border-blue-600 shadow-xl ring-2 ring-blue-200' : ''}`}>
+              {tier.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white">
+                  MOST POPULAR
+                </div>
+              )}
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{tier.name}</h3>
+              <p className="text-5xl font-black text-gray-900 mb-2">
+                {tier.price}<span className="text-lg font-normal text-gray-600">/packet</span>
+              </p>
+              <p className="text-gray-600 mb-8">{tier.desc}</p>
+              <ul className="space-y-4 mb-8 text-left">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex items-center gap-3">
+                    <Check className="h-6 w-6 text-green-600" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button className="w-full btn-primary text-lg py-3" href="/login">
+                Get Started
+              </Button>
+            </div>
+          ))}
         </div>
       </section>
 
