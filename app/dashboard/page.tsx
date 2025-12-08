@@ -1,6 +1,4 @@
-// app/dashboard/page.tsx — FIXED FOR TIMEOUT
-"use client"
-
+// app/dashboard/page.tsx — FINAL: BIG BLUE BUTTON LIKE HOMEPAGE
 import Link from "next/link"
 
 export default function Dashboard() {
@@ -11,9 +9,14 @@ export default function Dashboard() {
           Welcome back!
         </h1>
 
+        {/* EXACT SAME BLUE BUTTON AS HOMEPAGE */}
         <Link
           href="/upload"
-          className="inline-block bg-blue-600 text-white px-12 py-6 rounded-xl text-2xl font-bold hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all"
+          className="inline-block bg-blue-600 text-white px-12 py-6 rounded-xl text-2xl font-bold hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+          style={{
+            background: "linear-gradient(to right, #2563eb, #3b82f6)",
+            boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
+          }}
         >
           Upload New Packet →
         </Link>
