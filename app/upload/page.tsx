@@ -1,53 +1,72 @@
-// app/upload/page.tsx — FINAL, BEAUTIFUL & WORKING
+// app/upload/page.tsx — FIXED: BIG BLUE BUTTON + FILE INPUT (MATCHES HOMEPAGE)
 "use client"
 import { useState } from "react"
+import Link from "next/link"
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
 
-  const getPrice = (size: number) => {
-    if (size > 5_000_000) return 199
-    if (size > 2_000_000) return 129
-    return 79
-  }
+  const getPrice = (size: number) => size > 5_000_000 ? 199 : size > 2_000_000 ? 129 : 79
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="pt-32 pb-24 text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-12">
+    <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom, #f8fafc, #ffffff)", paddingTop: "160px", paddingBottom: "120px", textAlign: "center" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}>
+        <h1 style={{ fontSize: "60px", fontWeight: "900", lineHeight: "1.1", color: "#0f172a", marginBottom: "32px" }}>
           Upload Vendor Packet
         </h1>
-        <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-          Drop any PDF — we'll fill it automatically in minutes.
+        <p style={{ fontSize: "24px", color: "#64748b", maxWidth: "800px", margin: "0 auto 48px" }}>
+          Drop any PDF (Walmart, Boeing, Amazon, etc.) — we'll fill it automatically in minutes.
         </p>
 
         {/* File Input Area */}
-        <div className="bg-white rounded-3xl shadow-2xl p-16 border-4 border-dashed border-blue-200 mb-12">
+        <div style={{
+          background: "white",
+          borderRadius: "24px",
+          padding: "48px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+          border: "4px dashed #e0e7ff",
+          marginBottom: "48px"
+        }}>
           <input
             type="file"
             accept=".pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-lg file:mr-6 file:py-4 file:px-8 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            style={{ display: "block", width: "100%", padding: "16px", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "18px" }}
           />
           {file && (
-            <p className="mt-10 text-3xl font-bold text-blue-600">
+            <p style={{ marginTop: "24px", fontSize: "32px", fontWeight: "bold", color: "#3b82f6" }}>
               Price: ${getPrice(file.size)}
+            </p>
+          )}
+          {!file && (
+            <p style={{ marginTop: "24px", fontSize: "20px", color: "#9ca3af" }}>
+              Select a PDF above to get pricing.
             </p>
           )}
         </div>
 
-        {/* Big Blue Button — IDENTICAL TO HOMEPAGE */}
-        <button
-          onClick={() => file ? alert(`Processing ${file.name} — $${getPrice(file.size)}`) : alert("Please select a file")}
-          disabled={!file}
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-12 py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 disabled:opacity-50"
+        {/* BIG BLUE BUTTON — EXACT SAME AS HOMEPAGE */}
+        <Link
+          href={file ? "/upload/success" : "#"}
+          className="inline-block"
           style={{
-            background: "linear-gradient(to right, #2563eb, #3b82f6)",
-            boxShadow: "0 10px 30px rgba(59,130,246,0.4)",
+            background: "linear-gradient(to right, #3b82f6, #2563eb)",
+            color: "white",
+            padding: "24px 56px",
+            borderRadius: "16px",
+            fontSize: "28px",
+            fontWeight: "700",
+            textDecoration: "none",
+            boxShadow: "0 12px 30px rgba(59, 130, 246, 0.5)",
+            transition: "all 0.3s ease",
+            cursor: file ? "pointer" : "not-allowed",
+            opacity: file ? 1 : 0.6
           }}
+          onMouseEnter={(e) => file && (e.currentTarget.style.background = "linear-gradient(to right, #2563eb, #1d4ed8)")}
+          onMouseLeave={(e) => file && (e.currentTarget.style.background = "linear-gradient(to right, #3b82f6, #2563eb)")}
         >
           Pay & Fill Packet →
-        </button>
+        </Link>
       </div>
     </div>
   )
