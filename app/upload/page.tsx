@@ -1,20 +1,11 @@
-// app/upload/page.tsx — PROFESSIONAL VERSION (MATCHES HOMEPAGE)
+// app/upload/page.tsx — FIXED PROFESSIONAL VERSION
 "use client"
 import { useState } from "react"
-import Link from "next/link"
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
 
-  const handleUpload = () => {
-    if (!file) {
-      alert("Please select a PDF first!")
-      return
-    }
-    // Mock payment — replace with Stripe later
-    alert(`Processing ${file.name}... Price: $${file.size > 5000000 ? 199 : file.size > 2000000 ? 129 : 79}`)
-    // Redirect to success or email
-  }
+  const getPrice = (size: number) => size > 5000000 ? 199 : size > 2000000 ? 129 : 79
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -34,7 +25,7 @@ export default function Upload() {
           />
           {file && (
             <p className="text-3xl font-bold text-blue-600 mb-8">
-              Price: ${file.size > 5000000 ? "199" : file.size > 2000000 ? "129" : "79"}
+              Price: ${getPrice(file.size)}
             </p>
           )}
           {!file && (
@@ -44,7 +35,13 @@ export default function Upload() {
           )}
         </div>
         <button
-          onClick={handleUpload}
+          onClick={() => {
+            if (!file) {
+              alert("Please select a PDF first!")
+              return
+            }
+            alert(`Processing ${file.name}... Price: $${getPrice(file.size)}`)
+          }}
           disabled={!file}
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-12 py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 disabled:opacity-50"
           style={{
