@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — FIXED TYPE ERROR (v0.9+ SDK)
+// app/api/fill/route.ts — FIXED: BETA METHOD + TYPE CASTING
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    const completion = await anthropic.messages.create({
+    const completion = await anthropic.beta.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       temperature: 0,
@@ -49,9 +49,10 @@ Output ONLY valid JSON with field name as key and value as string.
 Never hallucinate. Use "N/A" if unsure.`,
         },
       ],
+      betas: ["messages-2024-10-21"], // Required for Sonnet 3.5
     })
 
-    // FIXED: Cast content[0] to access 'text' (SDK type is ContentBlock)
+    // FIXED: Cast to access .text (ContentBlock type)
     const filledText = (completion.content[0] as any).text
     const filledData = JSON.parse(filledText)
 
