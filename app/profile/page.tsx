@@ -1,4 +1,4 @@
-// app/profile/page.tsx — FIXED SYNTAX & VERTICAL STACK
+// app/profile/page.tsx — COMPLETE & FINAL VERSION
 "use client"
 import { useState } from "react"
 
@@ -27,56 +27,62 @@ export default function Profile() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-8 text-center">
           Your Company Profile
         </h1>
-        <p className="text-xl text-gray-600 mb-12 text-center max-w-xl mx-auto">
-          Fill this once — we'll use it to auto-fill every vendor packet forever.
+        <p className="text-xl text-gray-600 mb-12 text-center">
+          Fill this once — we’ll use it to auto-fill every vendor packet forever.
         </p>
-        <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-6">
+
+        <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-8">
+          {/* ALL FIELDS ARE FULL-WIDTH & VERTICALLY STACKED */}
           <input
+            type="text"
             placeholder="Company Name"
             value={data.companyName}
             onChange={(e) => updateField("companyName", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
           <input
-            placeholder="Tax ID / EIN"
             type="password"
+            placeholder="Tax ID / EIN"
             value={data.taxId}
             onChange={(e) => updateField("taxId", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
           <input
-            placeholder="Bank Account"
             type="password"
+            placeholder="Bank Account Number"
             value={data.bankAccount}
             onChange={(e) => updateField("bankAccount", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
           <input
-            placeholder="Bank Routing"
+            type="text"
+            placeholder="Bank Routing Number"
             value={data.bankRouting}
             onChange={(e) => updateField("bankRouting", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
           <input
-            placeholder="Accounting Email"
             type="email"
+            placeholder="Accounting Contact Email"
             value={data.accountingEmail}
             onChange={(e) => updateField("accountingEmail", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
           <input
-            placeholder="Sales Email"
             type="email"
+            placeholder="Sales Contact Email"
             value={data.salesEmail}
             onChange={(e) => updateField("salesEmail", e.target.value)}
-            className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full p-5 border-2 border-gray-300 rounded-xl text-lg focus:border-blue-600 focus:outline-none transition"
           />
+
+          {/* BIG BLUE BUTTON — SAME AS HOMEPAGE */}
           <button
             onClick={saveProfile}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
             style={{
               background: "linear-gradient(to right, #2563eb, #3b82f6)",
-              boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
+              boxShadow: "0 10px 30px rgba(59,130,246,0.4)"
             }}
           >
             Save Profile →
