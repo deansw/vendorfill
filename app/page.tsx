@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Check } from "lucide-react"
 
 export default function Home() {
   const tiers = [
@@ -10,104 +8,112 @@ export default function Home() {
   ]
 
   return (
-    <div className="gradient-hero min-h-screen">
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom, #f8f9fa, #ffffff', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#111827', lineHeight: 1.6 }}>
       {/* Header */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b bg-white/95 backdrop-blur-md">
-        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-2xl font-bold text-white">
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, borderBottom: '1px solid #e5e7eb', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+            <div style={{ width: '2.5rem', height: '2.5rem', background: 'linear-gradient(to bottom right, #2563eb, #4f46e5)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.25rem' }}>
               VF
             </div>
-            <span className="text-2xl font-bold text-gray-900">VendorFill AI</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>VendorFill AI</span>
           </Link>
-          <Button className="btn-primary px-8" href="/login">Get Started →</Button>
+          <button style={{ background: '#2563eb', color: 'white', padding: '0.75rem 2rem', borderRadius: '0.5rem', fontWeight: 'semibold', fontSize: '1rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
+            <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Get Started →</Link>
+          </button>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="hero-section">
-        <h1 className="hero-h1">
-          Never Fill Out Another<br />Vendor Form Manually
-        </h1>
-        <p className="hero-p">
-          Upload any supplier packet — get back a perfectly filled + signed PDF in under 10 minutes.
-        </p>
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center mt-10">
-          <Button className="btn-primary text-lg px-10 py-4" href="/login">
-            Start Free →
-          </Button>
-          <div className="flex gap-8 text-sm text-gray-600">
-            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> No credit card</span>
-            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> Cancel anytime</span>
+      <section style={{ paddingTop: '8rem', paddingBottom: '6rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem' }}>
+          <h1 style={{ fontSize: '3.75rem', fontWeight: 'black', lineHeight: 1.1, color: '#111827', marginBottom: '1.5rem' }}>
+            Never Fill Out Another<br />Vendor Form Manually
+          </h1>
+          <p style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.25rem', color: '#4b5563', marginBottom: '2rem' }}>
+            Upload any supplier packet — get back a perfectly filled + signed PDF in under 10 minutes.
+          </p>
+          <button style={{ background: '#2563eb', color: 'white', padding: '1rem 3rem', borderRadius: '0.5rem', fontWeight: 'semibold', fontSize: '1.125rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
+            <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Start Free →</Link>
+          </button>
+          <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center', gap: '2rem', fontSize: '0.875rem', color: '#4b5563' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✓ No credit card</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✓ Cancel anytime</span>
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="section bg-gray-50">
-        <h2 className="text-center text-4xl font-bold text-gray-900 mb-16 md:text-5xl">How It Works</h2>
-        <div className="grid gap-12 md:grid-cols-3">
-          {[
-            { step: "1", title: "Build Your Profile Once", desc: "Company info, tax ID, bank, insurance — saved forever." },
-            { step: "2", title: "Upload Any Packet", desc: "Walmart, Boeing, Amazon, hospitals, government — we handle them all." },
-            { step: "3", title: "Get Filled PDF Instantly", desc: "Claude + Grok fill every field. Download or email." },
-          ].map((item) => (
-            <div key={item.step} className="step-card">
-              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-4xl font-bold text-blue-600">
-                {item.step}
+      <section style={{ background: '#f9fafb', padding: '6rem 1.5rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '3rem' }}>How It Works</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+            {[
+              { title: "Build Your Profile Once", desc: "Company info, tax ID, bank, insurance — saved forever." },
+              { title: "Upload Any Packet", desc: "Walmart, Boeing, Amazon, hospitals, government — we handle them all." },
+              { title: "Get Filled PDF Instantly", desc: "Claude + Grok fill every field. Download or email." },
+            ].map((item, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{ margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '5rem', width: '5rem', borderRadius: '50%', background: '#dbeafe', fontSize: '2rem', fontWeight: 'bold', color: '#2563eb' }}>
+                  {i + 1}
+                </div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>{item.title}</h3>
+                <p style={{ fontSize: '1rem', color: '#4b5563' }}>{item.desc}</p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{item.title}</h3>
-              <p className="text-lg text-gray-600">{item.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="section">
-        <h2 className="text-center text-4xl font-bold text-gray-900 mb-4 md:text-5xl">Pay-Per-Packet Pricing</h2>
-        <p className="text-center text-xl text-gray-600 mb-16">No subscription. Only pay when you win a contract.</p>
-        <div className="grid gap-8 md:grid-cols-3">
-          {tiers.map((tier) => (
-            <div key={tier.name} className={`pricing-card ${tier.popular ? 'border-blue-600 shadow-xl ring-2 ring-blue-200' : ''}`}>
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white">
-                  MOST POPULAR
-                </div>
-              )}
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{tier.name}</h3>
-              <p className="text-5xl font-black text-gray-900 mb-2">
-                {tier.price}<span className="text-lg font-normal text-gray-600">/packet</span>
-              </p>
-              <p className="text-gray-600 mb-8">{tier.desc}</p>
-              <ul className="space-y-4 mb-8 text-left">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex items-center gap-3">
-                    <Check className="h-6 w-6 text-green-600" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full btn-primary text-lg py-3" href="/login">
-                Get Started
-              </Button>
-            </div>
-          ))}
+      <section style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>Pay-Per-Packet Pricing</h2>
+          <p style={{ fontSize: '1.125rem', color: '#4b5563', marginBottom: '3rem' }}>No subscription. Only pay when you win a contract.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            {tiers.map((tier) => (
+              <div key={tier.name} style={{ background: 'white', borderRadius: '1rem', padding: '2.5rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', border: tier.popular ? '2px solid #2563eb' : '1px solid #e5e7eb', position: 'relative' }}>
+                {tier.popular && (
+                  <div style={{ position: 'absolute', top: '-1rem', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', color: 'white', padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.75rem', fontWeight: 'medium' }}>
+                    MOST POPULAR
+                  </div>
+                )}
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '1rem' }}>{tier.name}</h3>
+                <p style={{ fontSize: '3rem', fontWeight: 'black', color: '#111827', marginBottom: '0.5rem' }}>
+                  {tier.price}<span style={{ fontSize: '1rem', fontWeight: 'normal', color: '#4b5563' }}>/packet</span>
+                </p>
+                <p style={{ color: '#4b5563', marginBottom: '2rem' }}>{tier.desc}</p>
+                <ul style={{ listStyle: 'none', spaceY: '1rem', textAlign: 'left' }}>
+                  {tier.features.map((f) => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm5.707 7.707l-6 6a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 1.414-1.414L9 11.586l5.293-5.293a1 1 0 1 1 1.414 1.414z" fill="#22c55e" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button style={{ background: '#2563eb', color: 'white', padding: '1rem', borderRadius: '0.5rem', fontWeight: 'medium', fontSize: '1.125rem', cursor: 'pointer', border: 'none', width: '100%', transition: 'background 0.2s' }}>
+                  <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Get Started</Link>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-blue-600 py-20 text-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold md:text-5xl mb-6">Ready to Save 10+ Hours Per Vendor?</h2>
-          <p className="text-xl mb-8">Join hundreds of suppliers already using VendorFill AI</p>
-          <Button className="btn-primary text-xl px-12 py-4 bg-white text-blue-600 hover:bg-gray-100" href="/login">
-            Start Filling Packets Now →
-          </Button>
+      <section style={{ background: '#2563eb', padding: '6rem 1.5rem', color: 'white', textAlign: 'center' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Ready to Save 10+ Hours Per Vendor?</h2>
+          <p style={{ fontSize: '1.125rem', marginBottom: '2rem' }}>Join hundreds of suppliers already using VendorFill AI</p>
+          <button style={{ background: 'white', color: '#2563eb', padding: '1rem 3rem', borderRadius: '0.5rem', fontWeight: 'medium', fontSize: '1.125rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
+            <Link href="/login" style={{ color: '#2563eb', textDecoration: 'none' }}>Start Filling Packets Now →</Link>
+          </button>
         </div>
       </section>
 
-      <footer className="border-t bg-gray-50 py-8 text-center text-sm text-gray-600">
+      <footer style={{ background: '#f9fafb', padding: '2rem', textAlign: 'center', fontSize: '0.875rem', color: '#4b5563', borderTop: '1px solid #e5e7eb' }}>
         © 2025 VendorFill AI — All rights reserved
       </footer>
     </div>
