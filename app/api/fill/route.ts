@@ -1,6 +1,6 @@
-// app/api/fill/route.ts — FIXED: ANY TYPE FOR MESSAGES (NO EXPORT ERROR)
+// app/api/fill/route.ts — FIXED: TYPED MESSAGES REQUEST
 import { NextRequest } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
+import Anthropic, { MessageCreateParams } from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
 const anthropic = new Anthropic({
@@ -30,11 +30,15 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Use any[] for messages (no named export needed)
-    const messages: any[] = [
-      {
-        role: "user",
-        content: `Fill this vendor form using ONLY the data below.
+    // FIXED: Use MessageCreateParams type for the request
+    const params: MessageCreateParams = {
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 4096,
+      temperature: 0,
+      messages: [
+        {
+          role: "user",
+          content: `Fill this vendor form using ONLY the data below.
 
 Company Data:
 ${JSON.stringify(mockProfile, null, 2)}
@@ -44,15 +48,11 @@ ${fieldNames.join("\n")}
 
 Output ONLY valid JSON with field name as key and value as string.
 Never hallucinate. Use "N/A" if unsure.`,
-      },
-    ]
+        },
+      ],
+    }
 
-    const completion = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 4096,
-      temperature: 0,
-      messages,
-    })
+    const completion = await anthropic.messages.create(params)
 
     // FIXED: Cast content[0] to access .text
     const filledText = (completion.content[0] as any).text
