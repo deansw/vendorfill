@@ -1,24 +1,13 @@
-import Link from "next/link"
+import BigBlueButton from "@/components/BigBlueButton"
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="pt-32 pb-24 text-center px-6">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-12">
-          Welcome back!
-        </h1>
-
-        <Link
-          href="/upload"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-12 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          Upload New Packet →
-        </Link>
-
-        <p className="mt-12 text-xl text-gray-600">
-          No packets yet — upload your first one above!
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-32 pb-24 text-center px-6">
+      <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 mb-12">
+        Welcome back!
+      </h1>
+      <BigBlueButton href="/upload">Upload New Packet →</BigBlueButton>
+      <p className="mt-12 text-xl text-gray-600">No packets yet — upload your first one above!</p>
     </div>
   )
 }
