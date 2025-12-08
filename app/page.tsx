@@ -19,7 +19,7 @@ export default function Home() {
             <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>VendorFill AI</span>
           </Link>
           <button style={{ background: '#2563eb', color: 'white', padding: '0.75rem 2rem', borderRadius: '0.5rem', fontWeight: 'semibold', fontSize: '1rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
-            <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Get Started →</Link>
+            <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none' }}>Get Started →</Link>
           </button>
         </div>
       </header>
@@ -34,7 +34,7 @@ export default function Home() {
             Upload any supplier packet — get back a perfectly filled + signed PDF in under 10 minutes.
           </p>
           <button style={{ background: '#2563eb', color: 'white', padding: '1rem 3rem', borderRadius: '0.5rem', fontWeight: 'semibold', fontSize: '1.125rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
-            <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Start Free →</Link>
+            <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none' }}>Start Free →</Link>
           </button>
           <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center', gap: '2rem', fontSize: '0.875rem', color: '#4b5563' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✓ No credit card</span>
