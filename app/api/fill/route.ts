@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — FINAL WORKING CLAUDE 3.5 (v0.9+ SDK)
+// app/api/fill/route.ts — FIXED TYPE ERROR (v0.9+ SDK)
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
@@ -51,7 +51,9 @@ Never hallucinate. Use "N/A" if unsure.`,
       ],
     })
 
-    const filledData = JSON.parse((completion.content[0] as any).text)
+    // FIXED: Cast content[0] to access 'text' (SDK type is ContentBlock)
+    const filledText = (completion.content[0] as any).text
+    const filledData = JSON.parse(filledText)
 
     // Fill PDF
     Object.entries(filledData).forEach(([name, value]) => {
@@ -74,6 +76,7 @@ Never hallucinate. Use "N/A" if unsure.`,
     return Response.json({
       success: true,
       filledPdf: `data:application/pdf;base64,${base64}`,
+      message: "PDF filled successfully by Claude 3.5!"
     })
   } catch (error: any) {
     return Response.json({ success: false, error: error.message }, { status: 500 })
