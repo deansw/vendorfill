@@ -83,13 +83,13 @@ export default function Home() {
                   {tier.price}<span style={{ fontSize: '1rem', fontWeight: 'normal', color: '#4b5563' }}>/packet</span>
                 </p>
                 <p style={{ color: '#4b5563', marginBottom: '2rem' }}>{tier.desc}</p>
-                <ul style={{ listStyle: 'none', spaceY: '1rem', textAlign: 'left' }}>
+                <ul style={{ listStyle: 'none', textAlign: 'left' }}>
                   {tier.features.map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm5.707 7.707l-6 6a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 1.414-1.414L9 11.586l5.293-5.293a1 1 0 1 1 1.414 1.414z" fill="#22c55e" />
-                      </svg>
-                      {f}
+                   <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm5.707 7.707l-6 6a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 1.414-1.414L9 11.586l5.293-5.293a1 1 0 1 1 1.414 1.414z" fill="#22c55e" />
+                     </svg>
+                     <span>{f}</span>
                     </li>
                   ))}
                 </ul>
