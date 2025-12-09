@@ -1,15 +1,10 @@
-// app/api/fill/route.ts — WITH SAFETY CHECK FOR API KEY
+// app/api/fill/route.ts — FINAL WORKING VERSION WITH SAFETY CHECK
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
-// Safety check — will throw a clear error if key is missing
-if (!process.env.ANTHROPIC_API_KEY) {
-  return Response.json({ success: false, error: "ANTHROPIC_API_KEY is missing — check Vercel env vars" }, { status: 500 })
-}
-
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY!,
 })
 
 // Mock profile — replace with real Supabase fetch later
@@ -27,6 +22,14 @@ const mockProfile = {
 }
 
 export async function POST(req: NextRequest) {
+  // Safety check — returns clear error if key is missing
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { success: false, error: "ANTHROPIC_API_KEY is missing in Vercel environment variables" },
+      { status: 500 }
+    )
+  }
+
   try {
     const { pdfBase64 } = await req.json()
 
