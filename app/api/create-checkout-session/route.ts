@@ -1,6 +1,7 @@
-// app/api/create-checkout-session/route.ts — STRIPE CHECKOUT
+// app/api/create-checkout-session/route.ts
 import { NextRequest } from "next/server"
 import Stripe from "stripe"
+import { createClient } from "@/utils/supabase/server" // server client for webhook later
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -8,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const { price, pdfBase64, fileName } = await req.json()
+    const { price, pdfUrl, fileName } = await req.json()
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
               name: `Vendor Packet Processing - ${fileName}`,
               description: "AI-filled vendor onboarding form",
             },
-            unit_amount: price * 100, // cents
+            unit_amount: price, // price in cents
           },
           quantity: 1,
         },
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       success_url: `${req.headers.get("origin")}/upload/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/upload`,
       metadata: {
-        pdfBase64, // We'll use this on success to fill the PDF
+        pdfUrl,
         fileName,
       },
     })
