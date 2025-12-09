@@ -5,7 +5,7 @@ import { PDFDocument } from "pdf-lib"
 
 // Safety check — will throw a clear error if key is missing
 if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error("ANTHROPIC_API_KEY is missing in environment variables")
+  return Response.json({ success: false, error: "ANTHROPIC_API_KEY is missing — check Vercel env vars" }, { status: 500 })
 }
 
 const anthropic = new Anthropic({
