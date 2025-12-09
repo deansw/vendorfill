@@ -1,28 +1,16 @@
-// app/api/webhook/route.ts — FINAL WORKING WEBHOOK WITH MOCKPROFILE
+// app/api/webhook/route.ts — FINAL WITH EMAIL DELIVERY
 import { NextRequest } from "next/server"
 import Stripe from "stripe"
 import { PDFDocument } from "pdf-lib"
 import OpenAI from "openai"
+import { Resend } from "resend"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
-
-// Mock profile — replace with real Supabase fetch later
-const mockProfile = {
-  companyName: "Acme Corp",
-  legalName: "Acme Corporation Inc.",
-  taxId: "12-3456789",
-  entityType: "C-Corp",
-  address: "123 Main St, San Francisco, CA 94105",
-  phone: "(555) 123-4567",
-  bankAccount: "1234567890",
-  bankRouting: "021000021",
-  accountingEmail: "accounting@acme.com",
-  salesEmail: "sales@acme.com",
-}
+const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature")!
@@ -84,11 +72,20 @@ Never hallucinate. Use "N/A" if unsure.`,
 
     form.flatten()
     const filledPdfBytes = await pdfDoc.save()
-    const base64Filled = Buffer.from(filledPdfBytes).toString("base64")
 
-    // TODO: Email the filled PDF (Resend code goes here later)
-    console.log("Filled PDF ready for email")
-    console.log(`data:application/pdf;base64,${base64Filled}`)
+    // EMAIL DELIVERY WITH RESEND (this replaces the console.log)
+    await resend.emails.send({
+      from: "VendorFill AI <no-reply@yourdomain.com>", // change to your verified sender
+      to: customerEmail,
+      subject: `Your filled vendor packet - ${fileName}`,
+      text: "Your AI-filled vendor packet is attached. Thank you for using VendorFill AI!",
+      attachments: [
+        {
+          filename: `FILLED_${fileName}`,
+          content: Buffer.from(filledPdfBytes),
+        },
+      ],
+    })
   }
 
   return Response.json({ received: true })
