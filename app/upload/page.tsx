@@ -1,4 +1,4 @@
-// app/upload/page.tsx — FULL FILE WITH WORKING AI CALL
+// app/upload/page.tsx — FULL & WORKING (OPENAI OR ANTHROPIC)
 "use client"
 import { useState } from "react"
 
@@ -14,10 +14,10 @@ export default function Upload() {
 
     setLoading(true)
 
-    // Convert file to base64 so the server can read it
+    // Convert file to base64 (remove data URL prefix)
     const reader = new FileReader()
     reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1]  // remove data:application/pdf;base64,
+      const base64 = (reader.result as string).split(",")[1] // pure base64
 
       try {
         const res = await fetch("/api/fill", {
@@ -29,14 +29,14 @@ export default function Upload() {
         const data = await res.json()
 
         if (data.success) {
-          // Trigger download of the filled PDF
+          // Trigger download
           const link = document.createElement("a")
           link.href = data.filledPdf
           link.download = `FILLED_${file.name}`
           link.click()
           alert("Your filled PDF has been downloaded!")
         } else {
-          alert("Error: " + data.error)
+          alert("Error: " + (data.error || "Unknown error"))
         }
       } catch (err) {
         console.error(err)
@@ -59,6 +59,7 @@ export default function Upload() {
           Drop any PDF — we'll fill it automatically in minutes.
         </p>
 
+        {/* File Input Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-16 border-4 border-dashed border-blue-200 mb-12">
           <input
             type="file"
@@ -71,8 +72,14 @@ export default function Upload() {
               Price: ${file.size > 5_000_000 ? "199" : file.size > 2_000_000 ? "129" : "79"}
             </p>
           )}
+          {!file && (
+            <p className="mt-10 text-xl text-gray-600">
+              Select a PDF above to see pricing.
+            </p>
+          )}
         </div>
 
+        {/* BIG BLUE BUTTON — IDENTICAL TO HOMEPAGE */}
         <button
           onClick={handleUpload}
           disabled={!file || loading}
@@ -82,7 +89,7 @@ export default function Upload() {
             boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
           }}
         >
-          {loading ? "Processing with Claude..." : "Pay & Fill Packet →"}
+          {loading ? "Processing with AI..." : "Pay & Fill Packet →"}
         </button>
       </div>
     </div>
