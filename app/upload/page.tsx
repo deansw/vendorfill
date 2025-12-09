@@ -1,10 +1,15 @@
-// app/upload/page.tsx — FIXED CLIENT PAGE (no POST function)
+// app/upload/page.tsx — FULL WITH REAL STRIPE CHECKOUT
 "use client"
 import { useState } from "react"
+import { loadStripe } from "@stripe/stripe-js"
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+
+  const getPrice = (size: number) => (size > 5_000_000 ? 19900 : size > 2_000_000 ? 12900 : 7900) // cents
 
   const handleUpload = async () => {
     if (!file) {
@@ -14,31 +19,34 @@ export default function Upload() {
 
     setLoading(true)
 
+    // Convert file to base64 for the API route
     const reader = new FileReader()
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1]
 
       try {
-        const res = await fetch("/api/fill", {
+        const res = await fetch("/api/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pdfBase64: base64 }),
+          body: JSON.stringify({
+            price: getPrice(file.size),
+            pdfBase64: base64,
+            fileName: file.name,
+          }),
         })
 
         const data = await res.json()
 
-        if (data.success) {
-          const link = document.createElement("a")
-          link.href = data.filledPdf
-          link.download = `FILLED_${file.name}`
-          link.click()
-          alert("Your filled PDF has been downloaded!")
+        if (data.sessionId) {
+          const stripe = await stripePromise
+          const { error } = await stripe!.redirectToCheckout({ sessionId: data.sessionId })
+          if (error) alert(error.message)
         } else {
           alert("Error: " + data.error)
         }
       } catch (err) {
         console.error(err)
-        alert("Something went wrong. Check the console.")
+        alert("Something went wrong")
       } finally {
         setLoading(false)
       }
@@ -66,7 +74,7 @@ export default function Upload() {
           />
           {file && (
             <p className="mt-10 text-3xl font-bold text-blue-600">
-              Price: ${file.size > 5_000_000 ? "199" : file.size > 2_000_000 ? "129" : "79"}
+              Price: ${getPrice(file.size) / 100}
             </p>
           )}
         </div>
@@ -80,7 +88,7 @@ export default function Upload() {
             boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
           }}
         >
-          {loading ? "Processing with AI..." : "Pay & Fill Packet →"}
+          {loading ? "Preparing Checkout..." : "Pay & Fill Packet →"}
         </button>
       </div>
     </div>
