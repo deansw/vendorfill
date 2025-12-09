@@ -1,20 +1,20 @@
-// app/api/fill/route.ts — FINAL WORKING VERSION (no TypeScript errors)
+// app/api/fill/route.ts — SAFE VERSION WITH ERROR CHECK
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error("ANTHROPIC_API_KEY is missing!")
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY || "dummy", // fallback to avoid crash
 })
 
-// Mock profile — replace with real Supabase fetch later
+// Mock profile
 const mockProfile = {
   companyName: "Acme Corp",
-  legalName: "Acme Corporation Inc.",
   taxId: "12-3456789",
-  entityType: "C-Corp",
-  address: "123 Main St, San Francisco, CA 94105",
-  phone: "(555) 123-4567",
   bankAccount: "1234567890",
   bankRouting: "021000021",
   accountingEmail: "accounting@acme.com",
@@ -23,17 +23,18 @@ const mockProfile = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { pdfBase64 } = await req.json()
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return Response.json({ success: false, error: "ANTHROPIC_API_KEY not set in environment" }, { status: 500 })
+    }
 
-    // Convert base64 back to buffer
+    const { pdfBase64 } = await req.json()
     const pdfBytes = Buffer.from(pdfBase64, "base64")
 
     const pdfDoc = await PDFDocument.load(pdfBytes)
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Cast to any to bypass strict TypeScript check
-    const completion = await (anthropic as any).messages.create({
+    const completion = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       temperature: 0,
@@ -54,11 +55,9 @@ Never hallucinate. Use "N/A" if unsure.`,
       ],
     })
 
-    // Extract Claude's JSON response
     const filledText = (completion.content[0] as any).text
     const filledData = JSON.parse(filledText)
 
-    // Fill the PDF
     Object.entries(filledData).forEach(([name, value]) => {
       try {
         const field = form.getField(name)
@@ -67,9 +66,7 @@ Never hallucinate. Use "N/A" if unsure.`,
         } else if (field.constructor.name.includes("CheckBox")) {
           if (String(value).toLowerCase().includes("yes")) (field as any).check()
         }
-      } catch (e) {
-        // Skip missing fields
-      }
+      } catch (e) {}
     })
 
     form.flatten()
@@ -79,9 +76,9 @@ Never hallucinate. Use "N/A" if unsure.`,
     return Response.json({
       success: true,
       filledPdf: `data:application/pdf;base64,${base64Filled}`,
-      message: "PDF filled successfully by Claude 3.5!",
     })
   } catch (error: any) {
-    return Response.json({ success: false, error: error.message }, { status: 500 })
+    console.error("Fill error:", error)
+    return Response.json({ success: false, error: error.message || "Unknown error" }, { status: 500 })
   }
 }
