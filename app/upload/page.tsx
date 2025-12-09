@@ -1,3 +1,4 @@
+// app/upload/page.tsx — FULL FILE WITH WORKING AI CALL
 "use client"
 import { useState } from "react"
 
@@ -6,38 +7,46 @@ export default function Upload() {
   const [loading, setLoading] = useState(false)
 
   const handleUpload = async () => {
-    if (!file) return
+    if (!file) {
+      alert("Please select a PDF first!")
+      return
+    }
 
     setLoading(true)
-    const formData = new FormData()
-    formData.append("file", file)
 
-    // Upload to temporary storage or use blob URL
-    const pdfUrl = URL.createObjectURL(file)
+    // Convert file to base64 so the server can read it
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1]  // remove data:application/pdf;base64,
 
-    try {
-      const res = await fetch("/api/fill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdfUrl }),
-      })
+      try {
+        const res = await fetch("/api/fill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pdfBase64: base64 }),
+        })
 
-      const data = await res.json()
-      if (data.success) {
-        const link = document.createElement("a")
-        link.href = data.filledPdf
-        link.download = `FILLED_${file.name}`
-        link.click()
-        alert("Your filled PDF is ready and downloaded!")
-      } else {
-        alert("Error: " + data.error)
+        const data = await res.json()
+
+        if (data.success) {
+          // Trigger download of the filled PDF
+          const link = document.createElement("a")
+          link.href = data.filledPdf
+          link.download = `FILLED_${file.name}`
+          link.click()
+          alert("Your filled PDF has been downloaded!")
+        } else {
+          alert("Error: " + data.error)
+        }
+      } catch (err) {
+        console.error(err)
+        alert("Something went wrong. Check the console.")
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      alert("Something went wrong. Check console.")
-      console.error(err)
-    } finally {
-      setLoading(false)
     }
+
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -46,7 +55,7 @@ export default function Upload() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-12">
           Upload Vendor Packet
         </h1>
-        <p className="text-xl text-gray-600 mb-12">
+        <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
           Drop any PDF — we'll fill it automatically in minutes.
         </p>
 
@@ -59,7 +68,7 @@ export default function Upload() {
           />
           {file && (
             <p className="mt-10 text-3xl font-bold text-blue-600">
-              Price: ${file.size > 5_000_000 ? 199 : file.size > 2_000_000 ? 129 : 79}
+              Price: ${file.size > 5_000_000 ? "199" : file.size > 2_000_000 ? "129" : "79"}
             </p>
           )}
         </div>
