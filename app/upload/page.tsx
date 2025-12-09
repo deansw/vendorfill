@@ -1,72 +1,80 @@
-// app/upload/page.tsx — FIXED: BIG BLUE BUTTON + FILE INPUT (MATCHES HOMEPAGE)
 "use client"
 import { useState } from "react"
-import Link from "next/link"
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const getPrice = (size: number) => size > 5_000_000 ? 199 : size > 2_000_000 ? 129 : 79
+  const handleUpload = async () => {
+    if (!file) return
+
+    setLoading(true)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    // Upload to temporary storage or use blob URL
+    const pdfUrl = URL.createObjectURL(file)
+
+    try {
+      const res = await fetch("/api/fill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdfUrl }),
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        const link = document.createElement("a")
+        link.href = data.filledPdf
+        link.download = `FILLED_${file.name}`
+        link.click()
+        alert("Your filled PDF is ready and downloaded!")
+      } else {
+        alert("Error: " + data.error)
+      }
+    } catch (err) {
+      alert("Something went wrong. Check console.")
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom, #f8fafc, #ffffff)", paddingTop: "160px", paddingBottom: "120px", textAlign: "center" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}>
-        <h1 style={{ fontSize: "60px", fontWeight: "900", lineHeight: "1.1", color: "#0f172a", marginBottom: "32px" }}>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="pt-32 pb-24 text-center px-6 max-w-3xl mx-auto">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-12">
           Upload Vendor Packet
         </h1>
-        <p style={{ fontSize: "24px", color: "#64748b", maxWidth: "800px", margin: "0 auto 48px" }}>
-          Drop any PDF (Walmart, Boeing, Amazon, etc.) — we'll fill it automatically in minutes.
+        <p className="text-xl text-gray-600 mb-12">
+          Drop any PDF — we'll fill it automatically in minutes.
         </p>
 
-        {/* File Input Area */}
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-          border: "4px dashed #e0e7ff",
-          marginBottom: "48px"
-        }}>
+        <div className="bg-white rounded-3xl shadow-2xl p-16 border-4 border-dashed border-blue-200 mb-12">
           <input
             type="file"
             accept=".pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            style={{ display: "block", width: "100%", padding: "16px", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "18px" }}
+            className="block w-full text-lg file:mr-6 file:py-4 file:px-8 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           {file && (
-            <p style={{ marginTop: "24px", fontSize: "32px", fontWeight: "bold", color: "#3b82f6" }}>
-              Price: ${getPrice(file.size)}
-            </p>
-          )}
-          {!file && (
-            <p style={{ marginTop: "24px", fontSize: "20px", color: "#9ca3af" }}>
-              Select a PDF above to get pricing.
+            <p className="mt-10 text-3xl font-bold text-blue-600">
+              Price: ${file.size > 5_000_000 ? 199 : file.size > 2_000_000 ? 129 : 79}
             </p>
           )}
         </div>
 
-        {/* BIG BLUE BUTTON — EXACT SAME AS HOMEPAGE */}
-        <Link
-          href={file ? "/upload/success" : "#"}
-          className="inline-block"
+        <button
+          onClick={handleUpload}
+          disabled={!file || loading}
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-12 py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 disabled:opacity-50"
           style={{
-            background: "linear-gradient(to right, #3b82f6, #2563eb)",
-            color: "white",
-            padding: "24px 56px",
-            borderRadius: "16px",
-            fontSize: "28px",
-            fontWeight: "700",
-            textDecoration: "none",
-            boxShadow: "0 12px 30px rgba(59, 130, 246, 0.5)",
-            transition: "all 0.3s ease",
-            cursor: file ? "pointer" : "not-allowed",
-            opacity: file ? 1 : 0.6
+            background: "linear-gradient(to right, #2563eb, #3b82f6)",
+            boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
           }}
-          onMouseEnter={(e) => file && (e.currentTarget.style.background = "linear-gradient(to right, #2563eb, #1d4ed8)")}
-          onMouseLeave={(e) => file && (e.currentTarget.style.background = "linear-gradient(to right, #3b82f6, #2563eb)")}
         >
-          Pay & Fill Packet →
-        </Link>
+          {loading ? "Processing with Claude..." : "Pay & Fill Packet →"}
+        </button>
       </div>
     </div>
   )
