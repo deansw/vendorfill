@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — OPENAI VERSION (GPT-4o, no type errors)
+// app/api/fill/route.ts — OPENAI VERSION (GPT-4o, no errors)
 import { NextRequest } from "next/server"
 import OpenAI from "openai"
 import { PDFDocument } from "pdf-lib"
@@ -78,6 +78,7 @@ Never hallucinate. Use "N/A" if unsure.`,
       message: "PDF filled successfully by GPT-4o!",
     })
   } catch (error: any) {
+    console.error("Fill error:", error)
     return Response.json({ success: false, error: error.message || "Unknown error" }, { status: 500 })
   }
 }
