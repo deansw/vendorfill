@@ -1,10 +1,15 @@
-// app/api/fill/route.ts — FINAL WORKING VERSION (cast to any)
+// app/api/fill/route.ts — WITH SAFETY CHECK FOR API KEY
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { PDFDocument } from "pdf-lib"
 
+// Safety check — will throw a clear error if key is missing
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error("ANTHROPIC_API_KEY is missing in environment variables")
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
 // Mock profile — replace with real Supabase fetch later
@@ -31,7 +36,6 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    // FIXED: Cast to any to bypass strict TypeScript check
     const completion = await (anthropic as any).messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
@@ -53,11 +57,9 @@ Never hallucinate. Use "N/A" if unsure.`,
       ],
     })
 
-    // Extract Claude's response
     const filledText = (completion.content[0] as any).text
     const filledData = JSON.parse(filledText)
 
-    // Fill the PDF
     Object.entries(filledData).forEach(([name, value]) => {
       try {
         const field = form.getField(name)
