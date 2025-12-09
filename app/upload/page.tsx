@@ -1,19 +1,15 @@
-// app/upload/page.tsx — FULL FILE WITH STRIPE CHECKOUT
+// app/upload/page.tsx — FULL FILE WITH SUPABASE STORAGE UPLOAD
 "use client"
 import { useState } from "react"
-import { loadStripe } from "@stripe/stripe-js"
+import { createClient } from "@/utils/supabase/client" // your Supabase client (already in starter)
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+const supabase = createClient()
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const getPrice = (size: number) => {
-    if (size > 5_000_000) return 19900 // $199 in cents
-    if (size > 2_000_000) return 12900 // $129
-    return 7900 // $79
-  }
+  const getPrice = (size: number) => (size > 5_000_000 ? 19900 : size > 2_000_000 ? 12900 : 7900) // cents
 
   const handleUpload = async () => {
     if (!file) {
@@ -23,38 +19,44 @@ export default function Upload() {
 
     setLoading(true)
 
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1] // pure base64
+    try {
+      // 1. Upload PDF to Supabase Storage (bucket: packets, public)
+      const filePath = `pending/${Date.now()}-${file.name}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("packets")
+        .upload(filePath, file)
 
-      try {
-        const res = await fetch("/api/create-checkout-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            price: getPrice(file.size),
-            pdfBase64: base64,
-            fileName: file.name,
-          }),
-        })
+      if (uploadError) throw uploadError
 
-        const data = await res.json()
+      // 2. Get public URL
+      const { data: urlData } = supabase.storage.from("packets").getPublicUrl(filePath)
+      const publicUrl = urlData.publicUrl
 
-        if (data.sessionId) {
-          const stripe = await stripePromise
-          await stripe?.redirectToCheckout({ sessionId: data.sessionId })
-        } else {
-          alert("Error creating checkout: " + data.error)
-        }
-      } catch (err) {
-        console.error(err)
-        alert("Something went wrong. Check the console.")
-      } finally {
-        setLoading(false)
+      // 3. Create Stripe Checkout session with short URL
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          price: getPrice(file.size),
+          pdfUrl: publicUrl,
+          fileName: file.name,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.sessionId) {
+        const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+        await stripe?.redirectToCheckout({ sessionId: data.sessionId })
+      } else {
+        alert("Error: " + data.error)
       }
+    } catch (err: any) {
+      console.error(err)
+      alert("Upload failed: " + err.message)
+    } finally {
+      setLoading(false)
     }
-
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -90,7 +92,7 @@ export default function Upload() {
             boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
           }}
         >
-          {loading ? "Redirecting to Stripe..." : "Pay & Fill Packet →"}
+          {loading ? "Uploading & Redirecting..." : "Pay & Fill Packet →"}
         </button>
       </div>
     </div>
