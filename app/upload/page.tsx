@@ -1,6 +1,7 @@
 // app/upload/page.tsx — FULL FILE WITH SUPABASE STORAGE UPLOAD
 "use client"
 import { useState } from "react"
+import { loadStripe } from "@stripe/stripe-js"   // ← ADD THIS LINE
 import { createClient } from "@/utils/supabase/client" // your Supabase client (already in starter)
 
 const supabase = createClient()
