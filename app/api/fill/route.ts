@@ -1,10 +1,10 @@
-// app/api/fill/route.ts — FINAL WORKING VERSION WITH SAFETY CHECK
+// app/api/fill/route.ts — OPENAI VERSION (GPT-4o, no type errors)
 import { NextRequest } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
+import OpenAI from "openai"
 import { PDFDocument } from "pdf-lib"
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
 })
 
 // Mock profile — replace with real Supabase fetch later
@@ -22,14 +22,6 @@ const mockProfile = {
 }
 
 export async function POST(req: NextRequest) {
-  // Safety check — returns clear error if key is missing
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return Response.json(
-      { success: false, error: "ANTHROPIC_API_KEY is missing in Vercel environment variables" },
-      { status: 500 }
-    )
-  }
-
   try {
     const { pdfBase64 } = await req.json()
 
@@ -39,9 +31,8 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fieldNames = form.getFields().map(f => f.getName())
 
-    const completion = await (anthropic as any).messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 4096,
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // or "gpt-4o" for best quality
       temperature: 0,
       messages: [
         {
@@ -60,9 +51,10 @@ Never hallucinate. Use "N/A" if unsure.`,
       ],
     })
 
-    const filledText = (completion.content[0] as any).text
+    const filledText = completion.choices[0].message.content!
     const filledData = JSON.parse(filledText)
 
+    // Fill the PDF
     Object.entries(filledData).forEach(([name, value]) => {
       try {
         const field = form.getField(name)
@@ -72,7 +64,7 @@ Never hallucinate. Use "N/A" if unsure.`,
           if (String(value).toLowerCase().includes("yes")) (field as any).check()
         }
       } catch (e) {
-        // Skip missing fields
+        // skip missing fields
       }
     })
 
@@ -83,10 +75,9 @@ Never hallucinate. Use "N/A" if unsure.`,
     return Response.json({
       success: true,
       filledPdf: `data:application/pdf;base64,${base64Filled}`,
-      message: "PDF filled successfully by Claude 3.5!",
+      message: "PDF filled successfully by GPT-4o!",
     })
   } catch (error: any) {
-    console.error("Fill error:", error)
     return Response.json({ success: false, error: error.message || "Unknown error" }, { status: 500 })
   }
 }
