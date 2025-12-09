@@ -1,7 +1,6 @@
-// app/api/create-checkout-session/route.ts
+// app/api/create-checkout-session/route.ts — FIXED (no Supabase import)
 import { NextRequest } from "next/server"
 import Stripe from "stripe"
-import { createClient } from "@/utils/supabase/server" // server client for webhook later
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
               name: `Vendor Packet Processing - ${fileName}`,
               description: "AI-filled vendor onboarding form",
             },
-            unit_amount: price, // price in cents
+            unit_amount: price,
           },
           quantity: 1,
         },
