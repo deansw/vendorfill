@@ -1,6 +1,6 @@
-// app/upload/page.tsx — PROFESSIONAL LOOK
 "use client"
 import { useState } from "react"
+import PageShell from "@/components/PageShell"
 
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null)
@@ -9,47 +9,76 @@ export default function Upload() {
   const handleUpload = async () => {
     if (!file) return alert("Please select a PDF")
     setLoading(true)
-    // Your AI call goes here (we'll add it next)
     alert(`Processing ${file.name}... (AI will fill in 10-40 seconds)`)
     setLoading(false)
   }
 
+  const price =
+    !file ? null : file.size > 5_000_000 ? "199" : file.size > 2_000_000 ? "129" : "79"
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="pt-32 pb-24 text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-12">
-          Upload Vendor Packet
-        </h1>
-        <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-          Drop any PDF — we'll fill it automatically in minutes.
-        </p>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-16 border-4 border-dashed border-blue-200 mb-12">
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-lg file:mr-6 file:py-4 file:px-8 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
-          {file && (
-            <p className="mt-10 text-3xl font-bold text-blue-600">
-              Price: ${file.size > 5_000_000 ? "199" : file.size > 2_000_000 ? "129" : "79"}
-            </p>
-          )}
-        </div>
-
-        <button
-          onClick={handleUpload}
-          disabled={!file || loading}
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-12 py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 disabled:opacity-50"
+    <PageShell
+      title="Upload Vendor Packet"
+      subtitle="Drop any PDF — we'll fill it automatically in minutes."
+    >
+      <div
+        style={{
+          background: "white",
+          borderRadius: "24px",
+          boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+          padding: "48px",
+          border: "3px dashed rgba(59,130,246,0.35)",
+          maxWidth: "900px",
+          margin: "0 auto 48px auto",
+          textAlign: "left",
+        }}
+      >
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
           style={{
-            background: "linear-gradient(to right, #2563eb, #3b82f6)",
-            boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
+            width: "100%",
+            fontSize: "18px",
           }}
-        >
-          {loading ? "Processing..." : "Pay & Fill Packet →"}
-        </button>
+        />
+
+        {price && (
+          <p
+            style={{
+              marginTop: "28px",
+              fontSize: "28px",
+              fontWeight: "800",
+              color: "#2563eb",
+              textAlign: "center",
+            }}
+          >
+            Price: ${price}
+          </p>
+        )}
       </div>
-    </div>
+
+      <button
+        onClick={handleUpload}
+        disabled={!file || loading}
+        style={{
+          display: "inline-block",
+          background: "linear-gradient(to right, #3b82f6, #2563eb)",
+          color: "white",
+          padding: "24px 56px",
+          borderRadius: "16px",
+          fontSize: "28px",
+          fontWeight: "700",
+          border: "none",
+          textDecoration: "none",
+          boxShadow: "0 12px 30px rgba(59, 130, 246, 0.5)",
+          transition: "all 0.3s ease",
+          cursor: !file || loading ? "not-allowed" : "pointer",
+          opacity: !file || loading ? 0.6 : 1,
+        }}
+      >
+        {loading ? "Processing..." : "Pay & Fill Packet →"}
+      </button>
+    </PageShell>
   )
 }
