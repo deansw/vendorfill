@@ -17,8 +17,8 @@
     "react-dom": "^18",
     "stripe": "^16.2.0",
     "@stripe/stripe-js": "^2.4.0",
-    "@supabase/supabase-js": "^2.45.4",
-},
+    "@supabase/supabase-js": "^2.45.4"
+  },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
