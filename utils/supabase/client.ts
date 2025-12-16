@@ -1,4 +1,4 @@
-// utils/supabase/client.ts — NEW SSR VERSION
+// utils/supabase/client.ts — FINAL WORKING VERSION (no types import)
 import { createBrowserClient } from "@supabase/ssr"
 
 export const createClient = () =>
