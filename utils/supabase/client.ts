@@ -1,8 +1,8 @@
-// utils/supabase/client.ts — NEW SSR VERSION (official 2025 way)
-import { createBrowserClient } from "@supabase/ssr"
+// utils/supabase/client.ts — SIMPLE & WORKING (basic supabase-js client)
+import { createClient } from "@supabase/supabase-js"
 
 export const createClient = () =>
-  createBrowserClient(
+  createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
