@@ -1,13 +1,11 @@
 "use client"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
-import { useRouter } from "next/navigation"
 import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Signup() {
   const supabase = createClient()
-  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -16,11 +14,21 @@ export default function Signup() {
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
+  const canSubmit = useMemo(() => {
+    if (!email.trim()) return false
+    if (!password) return false
+    if (password.length < 6) return false
+    if (password !== confirmPassword) return false
+    return true
+  }, [email, password, confirmPassword])
+
   const handleSignup = async () => {
     setError("")
     setMessage("")
 
-    if (!email || !password) {
+    const cleanEmail = email.trim()
+
+    if (!cleanEmail || !password) {
       setError("Please enter an email and password.")
       return
     }
@@ -36,32 +44,34 @@ export default function Signup() {
     setLoading(true)
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
-        // After clicking the confirmation email (if enabled),
-        // Supabase can redirect here.
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        // After confirming the email, send them to login (more predictable than dashboard).
+        emailRedirectTo: `${window.location.origin}/login`,
       },
     })
 
     if (error) {
-      setError(error.message)
+      const msg = error.message || "Signup failed."
+
+      // Common case: user already exists (Supabase wording can vary by config)
+      if (msg.toLowerCase().includes("already") || msg.toLowerCase().includes("registered")) {
+        setError("That email is already registered. Try logging in instead.")
+      } else {
+        setError(msg)
+      }
+
       setLoading(false)
       return
     }
 
-    // If email confirmations are ON, user may be null until confirmed.
-    // Either way, we show a helpful success message.
-    setMessage(
-      data.user
-        ? "Account created! Redirecting..."
-        : "Account created! Check your email to confirm your account."
-    )
-
-    // If confirmations are off, user is created immediately:
-    if (data.user) {
-      router.push("/dashboard")
+    // If email confirmations are ON, you usually won't get an active session immediately.
+    // Give the user a crisp next step.
+    if (!data.user) {
+      setMessage("Account created! Check your email to confirm, then come back and log in.")
+    } else {
+      setMessage("Account created! You can log in now.")
     }
 
     setLoading(false)
@@ -138,20 +148,32 @@ export default function Signup() {
             />
           </label>
 
+          {/* Inline validation hint (optional but helpful) */}
+          {password && password.length < 6 && (
+            <p style={{ color: "#b45309", fontWeight: 700, textAlign: "center" }}>
+              Password must be at least 6 characters.
+            </p>
+          )}
+          {confirmPassword && password !== confirmPassword && (
+            <p style={{ color: "#b45309", fontWeight: 700, textAlign: "center" }}>
+              Passwords do not match.
+            </p>
+          )}
+
           {error && (
-            <p style={{ color: "#dc2626", fontWeight: 700, textAlign: "center" }}>
+            <p style={{ color: "#dc2626", fontWeight: 800, textAlign: "center" }}>
               {error}
             </p>
           )}
 
           {message && (
-            <p style={{ color: "#16a34a", fontWeight: 700, textAlign: "center" }}>
+            <p style={{ color: "#16a34a", fontWeight: 800, textAlign: "center" }}>
               {message}
             </p>
           )}
 
           <div style={{ marginTop: 6 }}>
-            <PrimaryCtaButton onClick={handleSignup} disabled={loading}>
+            <PrimaryCtaButton onClick={handleSignup} disabled={loading || !canSubmit}>
               {loading ? "Creating account..." : "Create Account →"}
             </PrimaryCtaButton>
           </div>
@@ -167,3 +189,4 @@ export default function Signup() {
     </PageShell>
   )
 }
+
