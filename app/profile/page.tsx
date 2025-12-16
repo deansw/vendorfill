@@ -1,4 +1,4 @@
-// app/profile/page.tsx — FINAL: VERTICAL STACKED FIELDS WITH LABELS ABOVE
+// app/profile/page.tsx — FULL WITH ALL REQUESTED FIELDS
 "use client"
 import { useState } from "react"
 
@@ -30,7 +30,7 @@ export default function Profile() {
     diversityStatus: "",
   })
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: keyof typeof data, value: string) => {
     setData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -50,7 +50,7 @@ export default function Profile() {
         </p>
 
         <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-8">
-          {/* VERTICAL STACK: LABEL ABOVE EACH FULL-WIDTH INPUT */}
+          {/* ALL FIELDS — VERTICAL STACK WITH LABELS ABOVE */}
           <div className="space-y-2">
             <label className="block text-lg font-semibold text-gray-700">Company Name</label>
             <input
@@ -67,7 +67,7 @@ export default function Profile() {
               type="text"
               value={data.legalName}
               onChange={(e) => updateField("legalName", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
             />
           </div>
 
@@ -77,7 +77,7 @@ export default function Profile() {
               type="password"
               value={data.taxId}
               onChange={(e) => updateField("taxId", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
             />
           </div>
 
@@ -87,7 +87,7 @@ export default function Profile() {
               type="text"
               value={data.dunsNumber}
               onChange={(e) => updateField("dunsNumber", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function Profile() {
               type="text"
               value={data.addressLine1}
               onChange={(e) => updateField("addressLine1", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
             />
           </div>
 
@@ -107,7 +107,7 @@ export default function Profile() {
               type="text"
               value={data.addressLine2}
               onChange={(e) => updateField("addressLine2", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
             />
           </div>
 
@@ -286,7 +286,7 @@ export default function Profile() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Diversity Status (e.g., Minority-Owned, Woman-Owned)</label>
+            <label className="block text-lg font-semibold text-gray-700">Diversity Status (e.g., Minority-Owned)</label>
             <input
               type="text"
               value={data.diversityStatus}
