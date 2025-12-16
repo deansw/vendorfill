@@ -1,6 +1,7 @@
-// app/profile/page.tsx — FULL WITH ALL REQUESTED FIELDS
 "use client"
 import { useState } from "react"
+import PageShell from "@/components/PageShell"
+import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Profile() {
   const [data, setData] = useState({
@@ -31,7 +32,7 @@ export default function Profile() {
   })
 
   const updateField = (field: keyof typeof data, value: string) => {
-    setData(prev => ({ ...prev, [field]: value }))
+    setData((prev) => ({ ...prev, [field]: value }))
   }
 
   const saveProfile = () => {
@@ -39,275 +40,218 @@ export default function Profile() {
     alert("Profile saved! Ready to fill vendor packets.")
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="pt-32 pb-24 px-6 max-w-3xl mx-auto">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-8 text-center">
-          Your Company Profile
-        </h1>
-        <p className="text-xl text-gray-600 mb-12 text-center max-w-2xl mx-auto">
-          Fill this once — we'll use it to auto-fill every vendor packet forever.
-        </p>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-12 space-y-8">
-          {/* ALL FIELDS — VERTICAL STACK WITH LABELS ABOVE */}
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Company Name</label>
-            <input
-              type="text"
-              value={data.companyName}
-              onChange={(e) => updateField("companyName", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Legal Name</label>
-            <input
-              type="text"
-              value={data.legalName}
-              onChange={(e) => updateField("legalName", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Tax ID / EIN</label>
-            <input
-              type="password"
-              value={data.taxId}
-              onChange={(e) => updateField("taxId", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">DUNS Number (optional)</label>
-            <input
-              type="text"
-              value={data.dunsNumber}
-              onChange={(e) => updateField("dunsNumber", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Address Line 1</label>
-            <input
-              type="text"
-              value={data.addressLine1}
-              onChange={(e) => updateField("addressLine1", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Address Line 2 (optional)</label>
-            <input
-              type="text"
-              value={data.addressLine2}
-              onChange={(e) => updateField("addressLine2", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700">City</label>
-              <input
-                type="text"
-                value={data.city}
-                onChange={(e) => updateField("city", e.target.value)}
-                className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700">State/Province</label>
-              <input
-                type="text"
-                value={data.state}
-                onChange={(e) => updateField("state", e.target.value)}
-                className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700">ZIP/Postal Code</label>
-              <input
-                type="text"
-                value={data.zip}
-                onChange={(e) => updateField("zip", e.target.value)}
-                className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Country</label>
-            <input
-              type="text"
-              value={data.country}
-              onChange={(e) => updateField("country", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Phone Number</label>
-            <input
-              type="tel"
-              value={data.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Website (optional)</label>
-            <input
-              type="url"
-              value={data.website}
-              onChange={(e) => updateField("website", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Entity Type (e.g., LLC, C-Corp)</label>
-            <input
-              type="text"
-              value={data.entityType}
-              onChange={(e) => updateField("entityType", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Bank Account Number</label>
-            <input
-              type="password"
-              value={data.bankAccount}
-              onChange={(e) => updateField("bankAccount", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Bank Routing Number</label>
-            <input
-              type="text"
-              value={data.bankRouting}
-              onChange={(e) => updateField("bankRouting", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <h2 className="text-3xl font-bold text-gray-900 mt-12 mb-6">Contacts</h2>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Accounting Contact Name</label>
-            <input
-              type="text"
-              value={data.accountingContactName}
-              onChange={(e) => updateField("accountingContactName", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Accounting Email</label>
-            <input
-              type="email"
-              value={data.accountingEmail}
-              onChange={(e) => updateField("accountingEmail", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Accounting Phone</label>
-            <input
-              type="tel"
-              value={data.accountingPhone}
-              onChange={(e) => updateField("accountingPhone", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Sales Contact Name</label>
-            <input
-              type="text"
-              value={data.salesContactName}
-              onChange={(e) => updateField("salesContactName", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Sales Email</label>
-            <input
-              type="email"
-              value={data.salesEmail}
-              onChange={(e) => updateField("salesEmail", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Sales Phone</label>
-            <input
-              type="tel"
-              value={data.salesPhone}
-              onChange={(e) => updateField("salesPhone", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <h2 className="text-3xl font-bold text-gray-900 mt-12 mb-6">Insurance & Certifications</h2>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Insurance Provider</label>
-            <input
-              type="text"
-              value={data.insuranceProvider}
-              onChange={(e) => updateField("insuranceProvider", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Insurance Policy Number</label>
-            <input
-              type="text"
-              value={data.insurancePolicy}
-              onChange={(e) => updateField("insurancePolicy", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700">Diversity Status (e.g., Minority-Owned)</label>
-            <input
-              type="text"
-              value={data.diversityStatus}
-              onChange={(e) => updateField("diversityStatus", e.target.value)}
-              className="w-full p-5 border-2 border-gray-200 rounded-xl text-lg focus:border-blue-500"
-            />
-          </div>
-
-          {/* BIG BLUE SAVE BUTTON */}
-          <button
-            onClick={saveProfile}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl py-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-            style={{
-              background: "linear-gradient(to right, #2563eb, #3b82f6)",
-              boxShadow: "0 10px 30px rgba(59, 130, 246, 0.4)",
-            }}
-          >
-            Save Profile →
-          </button>
-        </div>
-      </div>
+  const Field = ({
+    label,
+    type = "text",
+    value,
+    onChange,
+    placeholder,
+  }: {
+    label: string
+    type?: string
+    value: string
+    onChange: (v: string) => void
+    placeholder?: string
+  }) => (
+    <div style={{ marginBottom: 18 }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: 18,
+          fontWeight: 700,
+          color: "#334155",
+          marginBottom: 8,
+        }}
+      >
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "18px 18px",
+          borderRadius: 14,
+          border: "2px solid #e2e8f0",
+          fontSize: 18,
+          outline: "none",
+        }}
+      />
     </div>
   )
+
+  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+    <h2
+      style={{
+        fontSize: 30,
+        fontWeight: 900,
+        color: "#0f172a",
+        marginTop: 44,
+        marginBottom: 18,
+        textAlign: "left",
+      }}
+    >
+      {children}
+    </h2>
+  )
+
+  return (
+    <PageShell
+      title="Your Company Profile"
+      subtitle="Fill this once — we'll use it to auto-fill every vendor packet forever."
+    >
+      <div
+        style={{
+          background: "white",
+          borderRadius: 24,
+          boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+          padding: 42,
+          maxWidth: 980,
+          margin: "0 auto",
+          textAlign: "left",
+        }}
+      >
+        <Field
+          label="Company Name"
+          value={data.companyName}
+          onChange={(v) => updateField("companyName", v)}
+        />
+        <Field
+          label="Legal Name"
+          value={data.legalName}
+          onChange={(v) => updateField("legalName", v)}
+        />
+        <Field
+          label="Tax ID / EIN"
+          type="password"
+          value={data.taxId}
+          onChange={(v) => updateField("taxId", v)}
+        />
+        <Field
+          label="DUNS Number (optional)"
+          value={data.dunsNumber}
+          onChange={(v) => updateField("dunsNumber", v)}
+        />
+        <Field
+          label="Address Line 1"
+          value={data.addressLine1}
+          onChange={(v) => updateField("addressLine1", v)}
+        />
+        <Field
+          label="Address Line 2 (optional)"
+          value={data.addressLine2}
+          onChange={(v) => updateField("addressLine2", v)}
+        />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gap: 18,
+          }}
+        >
+          <Field label="City" value={data.city} onChange={(v) => updateField("city", v)} />
+          <Field label="State/Province" value={data.state} onChange={(v) => updateField("state", v)} />
+          <Field label="ZIP/Postal Code" value={data.zip} onChange={(v) => updateField("zip", v)} />
+        </div>
+
+        <Field
+          label="Country"
+          value={data.country}
+          onChange={(v) => updateField("country", v)}
+        />
+        <Field
+          label="Phone Number"
+          type="tel"
+          value={data.phone}
+          onChange={(v) => updateField("phone", v)}
+        />
+        <Field
+          label="Website (optional)"
+          type="url"
+          value={data.website}
+          onChange={(v) => updateField("website", v)}
+        />
+        <Field
+          label="Entity Type (e.g., LLC, C-Corp)"
+          value={data.entityType}
+          onChange={(v) => updateField("entityType", v)}
+        />
+        <Field
+          label="Bank Account Number"
+          type="password"
+          value={data.bankAccount}
+          onChange={(v) => updateField("bankAccount", v)}
+        />
+        <Field
+          label="Bank Routing Number"
+          value={data.bankRouting}
+          onChange={(v) => updateField("bankRouting", v)}
+        />
+
+        <SectionTitle>Contacts</SectionTitle>
+
+        <Field
+          label="Accounting Contact Name"
+          value={data.accountingContactName}
+          onChange={(v) => updateField("accountingContactName", v)}
+        />
+        <Field
+          label="Accounting Email"
+          type="email"
+          value={data.accountingEmail}
+          onChange={(v) => updateField("accountingEmail", v)}
+        />
+        <Field
+          label="Accounting Phone"
+          type="tel"
+          value={data.accountingPhone}
+          onChange={(v) => updateField("accountingPhone", v)}
+        />
+
+        <Field
+          label="Sales Contact Name"
+          value={data.salesContactName}
+          onChange={(v) => updateField("salesContactName", v)}
+        />
+        <Field
+          label="Sales Email"
+          type="email"
+          value={data.salesEmail}
+          onChange={(v) => updateField("salesEmail", v)}
+        />
+        <Field
+          label="Sales Phone"
+          type="tel"
+          value={data.salesPhone}
+          onChange={(v) => updateField("salesPhone", v)}
+        />
+
+        <SectionTitle>Insurance & Certifications</SectionTitle>
+
+        <Field
+          label="Insurance Provider"
+          value={data.insuranceProvider}
+          onChange={(v) => updateField("insuranceProvider", v)}
+        />
+        <Field
+          label="Insurance Policy Number"
+          value={data.insurancePolicy}
+          onChange={(v) => updateField("insurancePolicy", v)}
+        />
+        <Field
+          label="Diversity Status (e.g., Minority-Owned)"
+          value={data.diversityStatus}
+          onChange={(v) => updateField("diversityStatus", v)}
+        />
+
+        <div style={{ marginTop: 28 }}>
+          <PrimaryCtaButton onClick={saveProfile}>Save Profile →</PrimaryCtaButton>
+        </div>
+      </div>
+    </PageShell>
+  )
 }
+
