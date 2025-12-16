@@ -1,8 +1,4 @@
-// utils/supabase/client.ts — FINAL WORKING VERSION (no types import)
-import { createBrowserClient } from "@supabase/ssr"
+// utils/supabase/client.ts — SIMPLE & WORKING VERSION
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
-export const createClient = () =>
-  createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+export const createClient = () => createClientComponentClient()
