@@ -1,4 +1,4 @@
-// app/api/fill/route.ts — OPENAI VERSION (GPT-4o, no errors)
+// app/api/fill/route.ts — FULL & FIXED (mockProfile defined)
 import { NextRequest } from "next/server"
 import OpenAI from "openai"
 import { PDFDocument } from "pdf-lib"
@@ -7,7 +7,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 })
 
-// Mock profile — replace with real Supabase fetch later
+// Mock profile — defined here so no undefined error
 const mockProfile = {
   companyName: "Acme Corp",
   legalName: "Acme Corporation Inc.",
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const fieldNames = form.getFields().map(f => f.getName())
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // or "gpt-4o" for best quality
+      model: "gpt-4o-mini",
       temperature: 0,
       messages: [
         {
