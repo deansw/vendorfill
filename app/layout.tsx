@@ -1,4 +1,4 @@
-// app/layout.tsx — REPLACE EVERYTHING WITH THIS
+// app/layout.tsx — FULL WITH LOGIN LINK IN HEADER
 import "./globals.css"
 import Link from "next/link"
 
@@ -45,10 +45,20 @@ export default function RootLayout({
             </span>
           </Link>
 
-          <nav style={{ display: "flex", gap: "2rem" }}>
-            <Link href="/dashboard" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>Dashboard</Link>
-            <Link href="/upload" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>Upload</Link>
-            <Link href="/profile" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>Profile</Link>
+          {/* Navigation Links — including Login */}
+          <nav style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
+            <Link href="/dashboard" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>
+              Dashboard
+            </Link>
+            <Link href="/upload" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>
+              Upload
+            </Link>
+            <Link href="/profile" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>
+              Profile
+            </Link>
+            <Link href="/login" style={{ color: "#3b82f6", fontWeight: "600", textDecoration: "none" }}>
+              Login
+            </Link>
           </nav>
         </header>
 
