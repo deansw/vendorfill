@@ -1,8 +1,4 @@
-// utils/supabase/client.ts — SIMPLE & WORKING (no SSR wrapper)
-import { createClient } from "@supabase/supabase-js"
+// utils/supabase/client.ts — FINAL WORKING VERSION
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
-export const createClient = () =>
-  createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+export const supabaseClient = createClientComponentClient()
