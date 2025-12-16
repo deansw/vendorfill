@@ -1,8 +1,8 @@
-// utils/supabase/client.ts — FINAL WORKING VERSION
-import { createClient as supabaseCreateClient } from "@supabase/supabase-js"
+// utils/supabase/client.ts — SIMPLE & WORKING (basic supabase-js client)
+import { createClient } from "@supabase/supabase-js"
 
 export const createClient = () =>
-  supabaseCreateClient(
+  createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
