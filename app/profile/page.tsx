@@ -1,7 +1,34 @@
 "use client"
 import { useState } from "react"
 
-const EMPTY_PROFILE = {
+type ProfileData = {
+  companyName: string
+  legalName: string
+  taxId: string
+  dunsNumber: string
+  addressLine1: string
+  addressLine2: string
+  city: string
+  state: string
+  zip: string
+  country: string
+  phone: string
+  website: string
+  entityType: string
+  bankAccount: string
+  bankRouting: string
+  accountingContactName: string
+  accountingEmail: string
+  accountingPhone: string
+  salesContactName: string
+  salesEmail: string
+  salesPhone: string
+  insuranceProvider: string
+  insurancePolicy: string
+  diversityStatus: string
+}
+
+const EMPTY_PROFILE: ProfileData = {
   companyName: "",
   legalName: "",
   taxId: "",
@@ -28,22 +55,25 @@ const EMPTY_PROFILE = {
   diversityStatus: "",
 }
 
-export default function Profile() {
-  // ✅ Load from localStorage ONE time (prevents focus/scroll jumping)
-  const [data, setData] = useState(() => {
-    if (typeof window === "undefined") return EMPTY_PROFILE
-    try {
-      const raw = localStorage.getItem("vendorProfile")
-      return raw ? { ...EMPTY_PROFILE, ...JSON.parse(raw) } : EMPTY_PROFILE
-    } catch {
-      return EMPTY_PROFILE
-    }
-  })
+function loadProfileOnce(): ProfileData {
+  if (typeof window === "undefined") return EMPTY_PROFILE
+  try {
+    const raw = localStorage.getItem("vendorProfile")
+    if (!raw) return EMPTY_PROFILE
+    const parsed = JSON.parse(raw) as Partial<ProfileData>
+    return { ...EMPTY_PROFILE, ...parsed }
+  } catch {
+    return EMPTY_PROFILE
+  }
+}
 
+export default function Profile() {
+  // ✅ Strongly typed state fixes the "prev implicitly any" error
+  const [data, setData] = useState<ProfileData>(() => loadProfileOnce())
   const [savedMsg, setSavedMsg] = useState("")
 
-  const updateField = (field: keyof typeof data, value: string) => {
-    setData((prev) => ({ ...prev, [field]: value }))
+  const updateField = (field: keyof ProfileData, value: string) => {
+    setData((prev: ProfileData) => ({ ...prev, [field]: value }))
   }
 
   const saveProfile = () => {
@@ -146,6 +176,7 @@ export default function Profile() {
           <Field label="Legal Name" value={data.legalName} onChange={(v) => updateField("legalName", v)} />
           <Field label="Tax ID / EIN" type="password" value={data.taxId} onChange={(v) => updateField("taxId", v)} />
           <Field label="DUNS Number (optional)" value={data.dunsNumber} onChange={(v) => updateField("dunsNumber", v)} />
+
           <Field label="Address Line 1" value={data.addressLine1} onChange={(v) => updateField("addressLine1", v)} />
           <Field label="Address Line 2 (optional)" value={data.addressLine2} onChange={(v) => updateField("addressLine2", v)} />
 
@@ -159,64 +190,25 @@ export default function Profile() {
           <Field label="Phone Number" type="tel" value={data.phone} onChange={(v) => updateField("phone", v)} />
           <Field label="Website (optional)" type="url" value={data.website} onChange={(v) => updateField("website", v)} />
           <Field label="Entity Type (e.g., LLC, C-Corp)" value={data.entityType} onChange={(v) => updateField("entityType", v)} />
+
           <Field label="Bank Account Number" type="password" value={data.bankAccount} onChange={(v) => updateField("bankAccount", v)} />
           <Field label="Bank Routing Number" value={data.bankRouting} onChange={(v) => updateField("bankRouting", v)} />
 
           <SectionTitle>Contacts</SectionTitle>
 
-          <Field
-            label="Accounting Contact Name"
-            value={data.accountingContactName}
-            onChange={(v) => updateField("accountingContactName", v)}
-          />
-          <Field
-            label="Accounting Email"
-            type="email"
-            value={data.accountingEmail}
-            onChange={(v) => updateField("accountingEmail", v)}
-          />
-          <Field
-            label="Accounting Phone"
-            type="tel"
-            value={data.accountingPhone}
-            onChange={(v) => updateField("accountingPhone", v)}
-          />
+          <Field label="Accounting Contact Name" value={data.accountingContactName} onChange={(v) => updateField("accountingContactName", v)} />
+          <Field label="Accounting Email" type="email" value={data.accountingEmail} onChange={(v) => updateField("accountingEmail", v)} />
+          <Field label="Accounting Phone" type="tel" value={data.accountingPhone} onChange={(v) => updateField("accountingPhone", v)} />
 
-          <Field
-            label="Sales Contact Name"
-            value={data.salesContactName}
-            onChange={(v) => updateField("salesContactName", v)}
-          />
-          <Field
-            label="Sales Email"
-            type="email"
-            value={data.salesEmail}
-            onChange={(v) => updateField("salesEmail", v)}
-          />
-          <Field
-            label="Sales Phone"
-            type="tel"
-            value={data.salesPhone}
-            onChange={(v) => updateField("salesPhone", v)}
-          />
+          <Field label="Sales Contact Name" value={data.salesContactName} onChange={(v) => updateField("salesContactName", v)} />
+          <Field label="Sales Email" type="email" value={data.salesEmail} onChange={(v) => updateField("salesEmail", v)} />
+          <Field label="Sales Phone" type="tel" value={data.salesPhone} onChange={(v) => updateField("salesPhone", v)} />
 
           <SectionTitle>Insurance & Certifications</SectionTitle>
 
-          <Field
-            label="Insurance Provider"
-            value={data.insuranceProvider}
-            onChange={(v) => updateField("insuranceProvider", v)}
-          />
-          <Field
-            label="Insurance Policy Number"
-            value={data.insurancePolicy}
-            onChange={(v) => updateField("insurancePolicy", v)}
-          />
-          <Field
-            label="Diversity Status (e.g., Minority-Owned)"
-            value={data.diversityStatus}
-            onChange={(v) => updateField("diversityStatus", v)}
-          />
+          <Field label="Insurance Provider" value={data.insuranceProvider} onChange={(v) => updateField("insuranceProvider", v)} />
+          <Field label="Insurance Policy Number" value={data.insurancePolicy} onChange={(v) => updateField("insurancePolicy", v)} />
+          <Field label="Diversity Status (e.g., Minority-Owned)" value={data.diversityStatus} onChange={(v) => updateField("diversityStatus", v)} />
 
           <button
             onClick={saveProfile}
