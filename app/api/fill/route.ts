@@ -7,7 +7,12 @@ export const maxDuration = 60
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-// ✅ STEP A: Profile → Vendor form synonyms (the “translation layer”)
+function stripDataUrl(input: string) {
+  const idx = input.indexOf("base64,")
+  return idx >= 0 ? input.slice(idx + "base64,".length) : input
+}
+
+// STEP A: Profile → Vendor wording synonyms (general mapping help)
 const PROFILE_SYNONYMS: Record<string, string[]> = {
   companyName: ["name of company", "company name", "vendor name", "business name", "supplier name"],
   legalName: ["legal name", "registered name", "entity legal name"],
@@ -27,13 +32,58 @@ const PROFILE_SYNONYMS: Record<string, string[]> = {
   accountingEmail: ["email", "e-mail", "accounts payable email", "accounting email", "ap email", "billing email"],
   salesEmail: ["sales email", "contact email", "business email"],
 
+  accountingContactName: ["accounting contact", "accounts payable contact", "ap contact"],
+  salesContactName: ["sales contact", "company representative", "rep name", "representative"],
+
   bankAccount: ["bank account", "account number", "acct number"],
   bankRouting: ["routing", "routing number", "aba", "aba number"],
 }
 
-function stripDataUrl(input: string) {
-  const idx = input.indexOf("base64,")
-  return idx >= 0 ? input.slice(idx + "base64,".length) : input
+// STEP B: Form-specific ordered hints (crucial when PDF field names are generic)
+// If your PDF has a different order, update this list to match your packet.
+const VENDOR_FIELD_HINTS: string[] = [
+  "NAME OF COMPANY",
+  "ADDRESS",
+  "TELEPHONE NUMBER",
+  "FAX NUMBER",
+  "E-MAIL ADDRESS",
+  "WEB SITE ADDRESS",
+  "NAME & TITLE OF COMPANY REPRESENTATIVE",
+  "DIRECT E-MAIL ADDRESS OF COMPANY REPRESENTATIVE",
+  "COMPANY REPRESENTATIVE DIRECT NUMBER",
+  "COMPANY REPRESENTATIVE MOBILE NUMBER",
+  "DATE COMPANY WAS ESTABLISHED",
+  "GROSS ANNUAL SALES (LAST THREE YEARS)",
+  "LEGAL STRUCTURE (CHECK ONE)",
+  "TYPE OF BUSINESS / COMMODITY / SERVICE (CHECK ONE)",
+  "DETAILS ON SERVICES OR GOODS YOUR COMPANY SUPPLIES",
+]
+
+function normalizeProfile(profile: any) {
+  const addressFull = [
+    profile.addressLine1,
+    profile.addressLine2,
+    profile.city,
+    profile.state,
+    profile.zip,
+    profile.country,
+  ]
+    .filter(Boolean)
+    .join(", ")
+
+  const companyRepNameTitle =
+    [profile.salesContactName, profile.salesContactTitle].filter(Boolean).join(" — ") ||
+    profile.salesContactName ||
+    ""
+
+  return {
+    ...profile,
+    // Computed / convenience fields for vendor forms:
+    addressFull,
+    companyRepNameTitle,
+    primaryEmail: profile.accountingEmail || profile.salesEmail || "",
+    primaryPhone: profile.phone || "",
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -47,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => null)
     const pdfBase64Raw = body?.pdfBase64
-    const profile = body?.profile
+    const profileRaw = body?.profile
 
     if (!pdfBase64Raw || typeof pdfBase64Raw !== "string") {
       return NextResponse.json(
@@ -55,12 +105,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    if (!profile || typeof profile !== "object") {
+    if (!profileRaw || typeof profileRaw !== "object") {
       return NextResponse.json(
         { success: false, error: "profile is required (object from Profile page)." },
         { status: 400 }
       )
     }
+
+    const profile = normalizeProfile(profileRaw)
 
     const pdfBase64 = stripDataUrl(pdfBase64Raw)
     const pdfBytes = Buffer.from(pdfBase64, "base64")
@@ -69,10 +121,16 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fields = form.getFields()
 
-    const fieldMeta = fields.map((f) => ({
+    // Gather name + type and attach an ORDERED HINT to each field
+    const fieldMeta = fields.map((f, i) => ({
       name: f.getName(),
       type: f.constructor.name,
+      hint: VENDOR_FIELD_HINTS[i] || "", // if order doesn’t match, update VENDOR_FIELD_HINTS
+      index: i,
     }))
+
+    // (Optional) debugging — uncomment once to see your actual field order in logs:
+    // console.log("PDF field order:", fieldMeta.map(f => `${f.index}: ${f.name} (${f.type}) HINT=${f.hint}`))
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -82,7 +140,7 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content:
-            "You map a user's company profile into PDF form fields. Output MUST be a single valid JSON object. Keys MUST exactly match the provided PDF field names. Values must be strings.",
+            "You fill PDF form fields from a user profile. Output MUST be a single JSON object. Keys MUST exactly match the provided PDF field names. Values MUST be strings.",
         },
         {
           role: "user",
@@ -94,22 +152,19 @@ ${JSON.stringify(profile, null, 2)}
 PROFILE FIELD SYNONYMS (use these to match vendor wording to profile keys):
 ${JSON.stringify(PROFILE_SYNONYMS, null, 2)}
 
-PDF FIELDS (name + type):
-${fieldMeta.map((f) => `${f.name} (${f.type})`).join("\n")}
+PDF FIELDS (name + type + HINT):
+${fieldMeta.map((f) => `${f.name} (${f.type}) — HINT: ${f.hint || "NONE"}`).join("\n")}
 
 TASK:
-For EACH PDF field name, infer what it is asking for and assign the best value from the user profile.
-Use the synonym list above as the mapping logic.
-
-DEFAULTS / HEURISTICS:
-- If the field is ambiguous "email", prefer accountingEmail, else salesEmail.
-- If the field asks for company name, use companyName; if it asks for legal name, use legalName.
-- If the field asks for EIN/Tax ID, use taxId.
-- If it’s address, prefer addressLine1 + addressLine2 + city/state/zip when appropriate.
+For EACH PDF field:
+- Use the HINT as the primary signal for what the field represents.
+- Use the field name as a secondary signal.
+- Map the best matching value from the user profile (including computed fields like addressFull).
+- If ambiguous "email", choose accountingEmail first, else salesEmail, else primaryEmail.
 - If no confident match, use "N/A".
 
 CRITICAL OUTPUT RULES:
-- Output ONE JSON object only (no markdown).
+- Output ONE JSON object only (no markdown, no backticks).
 - Include EVERY PDF field name as a key.
 - Values must be strings.
 `,
@@ -135,7 +190,7 @@ CRITICAL OUTPUT RULES:
       )
     }
 
-    // Ensure all fields exist (if model missed any)
+    // Ensure every field exists (if model missed any)
     for (const f of fieldMeta) {
       if (!(f.name in filledData)) filledData[f.name] = "N/A"
     }
@@ -161,6 +216,7 @@ CRITICAL OUTPUT RULES:
     }
 
     form.flatten()
+
     const filledPdfBytes = await pdfDoc.save()
     const base64Filled = Buffer.from(filledPdfBytes).toString("base64")
 
