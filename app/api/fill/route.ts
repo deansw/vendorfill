@@ -7,6 +7,30 @@ export const maxDuration = 60
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
+// ✅ STEP A: Profile → Vendor form synonyms (the “translation layer”)
+const PROFILE_SYNONYMS: Record<string, string[]> = {
+  companyName: ["name of company", "company name", "vendor name", "business name", "supplier name"],
+  legalName: ["legal name", "registered name", "entity legal name"],
+  taxId: ["tax id", "ein", "tin", "federal id", "tax identification", "taxpayer id"],
+  entityType: ["entity type", "legal structure", "incorporation type"],
+
+  addressLine1: ["address", "street address", "address line 1", "mailing address"],
+  addressLine2: ["address line 2", "suite", "ste", "unit", "apt"],
+  city: ["city", "town"],
+  state: ["state", "province", "region"],
+  zip: ["zip", "zip code", "postal code"],
+  country: ["country"],
+
+  phone: ["phone", "telephone", "telephone number", "phone number", "tel"],
+  website: ["website", "web site", "url"],
+
+  accountingEmail: ["email", "e-mail", "accounts payable email", "accounting email", "ap email", "billing email"],
+  salesEmail: ["sales email", "contact email", "business email"],
+
+  bankAccount: ["bank account", "account number", "acct number"],
+  bankRouting: ["routing", "routing number", "aba", "aba number"],
+}
+
 function stripDataUrl(input: string) {
   const idx = input.indexOf("base64,")
   return idx >= 0 ? input.slice(idx + "base64,".length) : input
@@ -15,7 +39,10 @@ function stripDataUrl(input: string) {
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ success: false, error: "Missing OPENAI_API_KEY on server." }, { status: 500 })
+      return NextResponse.json(
+        { success: false, error: "Missing OPENAI_API_KEY on server." },
+        { status: 500 }
+      )
     }
 
     const body = await req.json().catch(() => null)
@@ -23,10 +50,16 @@ export async function POST(req: NextRequest) {
     const profile = body?.profile
 
     if (!pdfBase64Raw || typeof pdfBase64Raw !== "string") {
-      return NextResponse.json({ success: false, error: "pdfBase64 is required (base64 string)." }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "pdfBase64 is required (base64 string)." },
+        { status: 400 }
+      )
     }
     if (!profile || typeof profile !== "object") {
-      return NextResponse.json({ success: false, error: "profile is required (object from Profile page)." }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "profile is required (object from Profile page)." },
+        { status: 400 }
+      )
     }
 
     const pdfBase64 = stripDataUrl(pdfBase64Raw)
@@ -36,7 +69,6 @@ export async function POST(req: NextRequest) {
     const form = pdfDoc.getForm()
     const fields = form.getFields()
 
-    // Include both name + type to help mapping
     const fieldMeta = fields.map((f) => ({
       name: f.getName(),
       type: f.constructor.name,
@@ -50,23 +82,35 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content:
-            "You fill PDF form fields. Output MUST be a single valid JSON object. Keys must exactly match given field names. Values must be strings.",
+            "You map a user's company profile into PDF form fields. Output MUST be a single valid JSON object. Keys MUST exactly match the provided PDF field names. Values must be strings.",
         },
         {
           role: "user",
-          content: `Fill this vendor PDF using ONLY the company profile data below.
+          content: `You are filling a vendor PDF form.
 
-Company Profile JSON:
+USER PROFILE (source of truth):
 ${JSON.stringify(profile, null, 2)}
 
-PDF Fields (name + type):
+PROFILE FIELD SYNONYMS (use these to match vendor wording to profile keys):
+${JSON.stringify(PROFILE_SYNONYMS, null, 2)}
+
+PDF FIELDS (name + type):
 ${fieldMeta.map((f) => `${f.name} (${f.type})`).join("\n")}
 
-CRITICAL RULES:
-- Output ONE JSON object only.
-- JSON keys MUST include EVERY field name listed above (even if value is "N/A").
-- Use the profile data to map values to the most relevant fields.
-- If a field doesn't match anything in the profile, use "N/A".
+TASK:
+For EACH PDF field name, infer what it is asking for and assign the best value from the user profile.
+Use the synonym list above as the mapping logic.
+
+DEFAULTS / HEURISTICS:
+- If the field is ambiguous "email", prefer accountingEmail, else salesEmail.
+- If the field asks for company name, use companyName; if it asks for legal name, use legalName.
+- If the field asks for EIN/Tax ID, use taxId.
+- If it’s address, prefer addressLine1 + addressLine2 + city/state/zip when appropriate.
+- If no confident match, use "N/A".
+
+CRITICAL OUTPUT RULES:
+- Output ONE JSON object only (no markdown).
+- Include EVERY PDF field name as a key.
 - Values must be strings.
 `,
         },
@@ -75,7 +119,10 @@ CRITICAL RULES:
 
     const filledText = completion.choices?.[0]?.message?.content
     if (!filledText) {
-      return NextResponse.json({ success: false, error: "OpenAI returned empty response." }, { status: 500 })
+      return NextResponse.json(
+        { success: false, error: "OpenAI returned empty response." },
+        { status: 500 }
+      )
     }
 
     let filledData: Record<string, string>
@@ -88,7 +135,7 @@ CRITICAL RULES:
       )
     }
 
-    // ✅ Ensure all fields exist (if model missed any)
+    // Ensure all fields exist (if model missed any)
     for (const f of fieldMeta) {
       if (!(f.name in filledData)) filledData[f.name] = "N/A"
     }
@@ -124,6 +171,9 @@ CRITICAL RULES:
     })
   } catch (error: any) {
     console.error("Fill error:", error)
-    return NextResponse.json({ success: false, error: error?.message || "Unknown error" }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error?.message || "Unknown error" },
+      { status: 500 }
+    )
   }
 }
