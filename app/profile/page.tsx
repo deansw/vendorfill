@@ -4,6 +4,7 @@ import React, { useState } from "react"
 type ProfileData = {
   companyName: string
   legalName: string
+  legalStructure: string // ✅ NEW (for checkbox mapping)
   taxId: string
   dunsNumber: string
   addressLine1: string
@@ -31,6 +32,7 @@ type ProfileData = {
 const EMPTY_PROFILE: ProfileData = {
   companyName: "",
   legalName: "",
+  legalStructure: "", // ✅ NEW
   taxId: "",
   dunsNumber: "",
   addressLine1: "",
@@ -67,16 +69,18 @@ function loadProfileOnce(): ProfileData {
   }
 }
 
-// ✅ IMPORTANT: Component defined OUTSIDE Profile to prevent remount/focus loss
+// ✅ IMPORTANT: Defined OUTSIDE Profile so inputs keep focus
 function Field({
   label,
   type = "text",
   value,
+  placeholder,
   onChange,
 }: {
   label: string
   type?: string
   value: string
+  placeholder?: string
   onChange: (v: string) => void
 }) {
   return (
@@ -95,6 +99,7 @@ function Field({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         style={{
           width: "100%",
@@ -109,7 +114,6 @@ function Field({
   )
 }
 
-// ✅ Also outside
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2
@@ -177,43 +181,158 @@ export default function Profile() {
             margin: "0 auto",
           }}
         >
-          <Field label="Company Name" value={data.companyName} onChange={(v) => updateField("companyName", v)} />
-          <Field label="Legal Name" value={data.legalName} onChange={(v) => updateField("legalName", v)} />
-          <Field label="Tax ID / EIN" type="password" value={data.taxId} onChange={(v) => updateField("taxId", v)} />
-          <Field label="DUNS Number (optional)" value={data.dunsNumber} onChange={(v) => updateField("dunsNumber", v)} />
+          <Field
+            label="Company Name"
+            value={data.companyName}
+            onChange={(v) => updateField("companyName", v)}
+            placeholder="Acme Corp"
+          />
 
-          <Field label="Address Line 1" value={data.addressLine1} onChange={(v) => updateField("addressLine1", v)} />
-          <Field label="Address Line 2 (optional)" value={data.addressLine2} onChange={(v) => updateField("addressLine2", v)} />
+          <Field
+            label="Legal Name"
+            value={data.legalName}
+            onChange={(v) => updateField("legalName", v)}
+            placeholder="Acme Corporation Inc."
+          />
+
+          {/* ✅ NEW: Legal Structure to match checkbox forms */}
+          <Field
+            label="Legal Structure (LLC, C-Corp, S-Corp, Partnership, Sole Prop, Nonprofit)"
+            value={data.legalStructure}
+            onChange={(v) => updateField("legalStructure", v)}
+            placeholder="LLC"
+          />
+
+          <Field
+            label="Tax ID / EIN"
+            type="password"
+            value={data.taxId}
+            onChange={(v) => updateField("taxId", v)}
+            placeholder="12-3456789"
+          />
+
+          <Field
+            label="DUNS Number (optional)"
+            value={data.dunsNumber}
+            onChange={(v) => updateField("dunsNumber", v)}
+            placeholder="123456789"
+          />
+
+          <Field
+            label="Address Line 1"
+            value={data.addressLine1}
+            onChange={(v) => updateField("addressLine1", v)}
+            placeholder="123 Main St"
+          />
+
+          <Field
+            label="Address Line 2 (optional)"
+            value={data.addressLine2}
+            onChange={(v) => updateField("addressLine2", v)}
+            placeholder="Suite 400"
+          />
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 18 }}>
-            <Field label="City" value={data.city} onChange={(v) => updateField("city", v)} />
-            <Field label="State/Province" value={data.state} onChange={(v) => updateField("state", v)} />
-            <Field label="ZIP/Postal Code" value={data.zip} onChange={(v) => updateField("zip", v)} />
+            <Field label="City" value={data.city} onChange={(v) => updateField("city", v)} placeholder="San Francisco" />
+            <Field label="State/Province" value={data.state} onChange={(v) => updateField("state", v)} placeholder="CA" />
+            <Field label="ZIP/Postal Code" value={data.zip} onChange={(v) => updateField("zip", v)} placeholder="94105" />
           </div>
 
-          <Field label="Country" value={data.country} onChange={(v) => updateField("country", v)} />
-          <Field label="Phone Number" type="tel" value={data.phone} onChange={(v) => updateField("phone", v)} />
-          <Field label="Website (optional)" type="url" value={data.website} onChange={(v) => updateField("website", v)} />
-          <Field label="Entity Type (e.g., LLC, C-Corp)" value={data.entityType} onChange={(v) => updateField("entityType", v)} />
+          <Field label="Country" value={data.country} onChange={(v) => updateField("country", v)} placeholder="USA" />
 
-          <Field label="Bank Account Number" type="password" value={data.bankAccount} onChange={(v) => updateField("bankAccount", v)} />
+          <Field
+            label="Phone Number"
+            type="tel"
+            value={data.phone}
+            onChange={(v) => updateField("phone", v)}
+            placeholder="(555) 123-4567"
+          />
+
+          <Field
+            label="Website (optional)"
+            type="url"
+            value={data.website}
+            onChange={(v) => updateField("website", v)}
+            placeholder="https://yourcompany.com"
+          />
+
+          <Field
+            label="Entity Type (optional)"
+            value={data.entityType}
+            onChange={(v) => updateField("entityType", v)}
+            placeholder="LLC / C-Corp / etc."
+          />
+
+          <Field
+            label="Bank Account Number"
+            type="password"
+            value={data.bankAccount}
+            onChange={(v) => updateField("bankAccount", v)}
+          />
+
           <Field label="Bank Routing Number" value={data.bankRouting} onChange={(v) => updateField("bankRouting", v)} />
 
           <SectionTitle>Contacts</SectionTitle>
 
-          <Field label="Accounting Contact Name" value={data.accountingContactName} onChange={(v) => updateField("accountingContactName", v)} />
-          <Field label="Accounting Email" type="email" value={data.accountingEmail} onChange={(v) => updateField("accountingEmail", v)} />
-          <Field label="Accounting Phone" type="tel" value={data.accountingPhone} onChange={(v) => updateField("accountingPhone", v)} />
+          <Field
+            label="Accounting Contact Name"
+            value={data.accountingContactName}
+            onChange={(v) => updateField("accountingContactName", v)}
+          />
 
-          <Field label="Sales Contact Name" value={data.salesContactName} onChange={(v) => updateField("salesContactName", v)} />
-          <Field label="Sales Email" type="email" value={data.salesEmail} onChange={(v) => updateField("salesEmail", v)} />
-          <Field label="Sales Phone" type="tel" value={data.salesPhone} onChange={(v) => updateField("salesPhone", v)} />
+          <Field
+            label="Accounting Email"
+            type="email"
+            value={data.accountingEmail}
+            onChange={(v) => updateField("accountingEmail", v)}
+          />
+
+          <Field
+            label="Accounting Phone"
+            type="tel"
+            value={data.accountingPhone}
+            onChange={(v) => updateField("accountingPhone", v)}
+          />
+
+          <Field
+            label="Sales Contact Name"
+            value={data.salesContactName}
+            onChange={(v) => updateField("salesContactName", v)}
+          />
+
+          <Field
+            label="Sales Email"
+            type="email"
+            value={data.salesEmail}
+            onChange={(v) => updateField("salesEmail", v)}
+          />
+
+          <Field
+            label="Sales Phone"
+            type="tel"
+            value={data.salesPhone}
+            onChange={(v) => updateField("salesPhone", v)}
+          />
 
           <SectionTitle>Insurance & Certifications</SectionTitle>
 
-          <Field label="Insurance Provider" value={data.insuranceProvider} onChange={(v) => updateField("insuranceProvider", v)} />
-          <Field label="Insurance Policy Number" value={data.insurancePolicy} onChange={(v) => updateField("insurancePolicy", v)} />
-          <Field label="Diversity Status (e.g., Minority-Owned)" value={data.diversityStatus} onChange={(v) => updateField("diversityStatus", v)} />
+          <Field
+            label="Insurance Provider"
+            value={data.insuranceProvider}
+            onChange={(v) => updateField("insuranceProvider", v)}
+          />
+
+          <Field
+            label="Insurance Policy Number"
+            value={data.insurancePolicy}
+            onChange={(v) => updateField("insurancePolicy", v)}
+          />
+
+          <Field
+            label="Diversity Status (e.g., Minority-Owned)"
+            value={data.diversityStatus}
+            onChange={(v) => updateField("diversityStatus", v)}
+          />
 
           <button
             onClick={saveProfile}
