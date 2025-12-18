@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import React, { useState } from "react"
 
 type ProfileData = {
   companyName: string
@@ -67,32 +67,19 @@ function loadProfileOnce(): ProfileData {
   }
 }
 
-export default function Profile() {
-  // ✅ Strongly typed state fixes the "prev implicitly any" error
-  const [data, setData] = useState<ProfileData>(() => loadProfileOnce())
-  const [savedMsg, setSavedMsg] = useState("")
-
-  const updateField = (field: keyof ProfileData, value: string) => {
-    setData((prev: ProfileData) => ({ ...prev, [field]: value }))
-  }
-
-  const saveProfile = () => {
-    localStorage.setItem("vendorProfile", JSON.stringify(data))
-    setSavedMsg("Profile saved! Your uploads will use this info.")
-    setTimeout(() => setSavedMsg(""), 2500)
-  }
-
-  const Field = ({
-    label,
-    type = "text",
-    value,
-    onChange,
-  }: {
-    label: string
-    type?: string
-    value: string
-    onChange: (v: string) => void
-  }) => (
+// ✅ IMPORTANT: Component defined OUTSIDE Profile to prevent remount/focus loss
+function Field({
+  label,
+  type = "text",
+  value,
+  onChange,
+}: {
+  label: string
+  type?: string
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
     <div style={{ marginBottom: 18 }}>
       <label
         style={{
@@ -120,8 +107,11 @@ export default function Profile() {
       />
     </div>
   )
+}
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+// ✅ Also outside
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
     <h2
       style={{
         fontSize: 30,
@@ -134,6 +124,21 @@ export default function Profile() {
       {children}
     </h2>
   )
+}
+
+export default function Profile() {
+  const [data, setData] = useState<ProfileData>(() => loadProfileOnce())
+  const [savedMsg, setSavedMsg] = useState("")
+
+  const updateField = (field: keyof ProfileData, value: string) => {
+    setData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const saveProfile = () => {
+    localStorage.setItem("vendorProfile", JSON.stringify(data))
+    setSavedMsg("Profile saved! Your uploads will use this info.")
+    setTimeout(() => setSavedMsg(""), 2500)
+  }
 
   return (
     <div
