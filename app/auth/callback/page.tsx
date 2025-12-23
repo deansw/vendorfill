@@ -4,115 +4,114 @@ import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import PageShell from "@/components/PageShell"
+import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 function CallbackInner() {
   const router = useRouter()
   const params = useSearchParams()
-
-  // ✅ Create the client once (prevents effect loops / re-renders issues)
   const supabase = useMemo(() => createClient(), [])
 
-  const [status, setStatus] = useState<"loading" | "error" | "success">("loading")
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [message, setMessage] = useState("Finishing authentication…")
 
   useEffect(() => {
     const run = async () => {
       try {
+        // Some links include error params
         const errorParam = params.get("error")
         const errorDescription = params.get("error_description")
-        const code = params.get("code")
-
         if (errorParam) {
           setStatus("error")
           setMessage(decodeURIComponent(errorDescription || errorParam))
           return
         }
 
-        if (!code) {
-          setStatus("error")
-          setMessage("Missing confirmation code. Please try the link again or log in.")
+        // ✅ Support BOTH formats:
+        const code = params.get("code") // code exchange flow
+        const token_hash = params.get("token_hash") // verifyOtp flow
+        const type = params.get("type") as
+          | "signup"
+          | "recovery"
+          | "invite"
+          | "email_change"
+          | null
+
+        // Format A: ?code=
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) {
+            setStatus("error")
+            setMessage(error.message || "Could not complete sign-in.")
+            return
+          }
+
+          setStatus("success")
+          setMessage("Account confirmed! Redirecting…")
+          setTimeout(() => router.replace("/dashboard"), 400)
           return
         }
 
-        setStatus("loading")
-        setMessage("Confirming your account…")
+        // Format B: ?token_hash=...&type=signup
+        if (token_hash && type) {
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash,
+            type,
+          })
 
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) {
+            setStatus("error")
+            setMessage(error.message || "Could not verify email link.")
+            return
+          }
 
-        if (error) {
-          console.error("exchangeCodeForSession error:", error)
-          setStatus("error")
-          setMessage(error.message || "Could not complete sign-in. Please try logging in.")
+          // After verifyOtp, a session may or may not exist depending on your settings.
+          // We'll route to login and let them sign in, or you can route to dashboard if session exists.
+          const { data } = await supabase.auth.getSession()
+
+          setStatus("success")
+          setMessage("Email verified! Redirecting…")
+
+          setTimeout(() => {
+            router.replace(data.session ? "/dashboard" : "/login")
+          }, 400)
           return
         }
 
-        setStatus("success")
-        setMessage("Account confirmed! Redirecting to your dashboard…")
-
-        setTimeout(() => {
-          router.replace("/dashboard")
-        }, 600)
+        // Neither format present
+        setStatus("error")
+        setMessage("Missing confirmation code. Please try the link again or log in.")
       } catch (e: any) {
         setStatus("error")
-        setMessage(e?.message || "Unexpected error during authentication.")
+        setMessage(e?.message || "Unexpected error completing authentication.")
       }
     }
 
     run()
   }, [params, router, supabase])
 
-  if (status === "loading") {
-    return (
-      <div style={{ textAlign: "center", paddingTop: 10 }}>
-        <p style={{ fontSize: 20, color: "#64748b" }}>{message}</p>
-      </div>
-    )
-  }
-
-  if (status === "success") {
-    return (
-      <div style={{ textAlign: "center", paddingTop: 10 }}>
-        <p style={{ fontSize: 20, color: "#16a34a", fontWeight: 800 }}>{message}</p>
-      </div>
-    )
-  }
-
-  // error
   return (
-    <div style={{ textAlign: "center", paddingTop: 10 }}>
-      <p style={{ fontSize: 20, color: "#dc2626", fontWeight: 800, marginBottom: 18 }}>{message}</p>
+    <div style={{ textAlign: "center" }}>
+      <p
+        style={{
+          fontSize: 18,
+          fontWeight: 800,
+          color: status === "error" ? "#dc2626" : status === "success" ? "#16a34a" : "#64748b",
+          marginBottom: 18,
+        }}
+      >
+        {message}
+      </p>
 
-      <div style={{ display: "grid", gap: 12, justifyContent: "center" }}>
-        <a
-          href="/login"
-          style={{
-            display: "inline-block",
-            background: "linear-gradient(to right, #3b82f6, #2563eb)",
-            color: "white",
-            padding: "18px 36px",
-            borderRadius: 16,
-            fontSize: 22,
-            fontWeight: 800,
-            textDecoration: "none",
-            boxShadow: "0 12px 30px rgba(59, 130, 246, 0.45)",
-          }}
-        >
-          Go to Login →
-        </a>
-
-        <a
-          href="/signup"
-          style={{
-            display: "inline-block",
-            color: "#2563eb",
-            fontWeight: 800,
-            textDecoration: "none",
-            fontSize: 18,
-          }}
-        >
-          Need a new confirmation email? Sign up again →
-        </a>
-      </div>
+      {status === "error" && (
+        <div style={{ display: "grid", gap: 10, justifyContent: "center" }}>
+          <PrimaryCtaButton onClick={() => router.push("/login")}>
+            Go to Login →
+          </PrimaryCtaButton>
+          <a href="/signup" style={{ color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
+            Need a new confirmation email? Sign up again →
+          </a>
+        </div>
+      )}
     </div>
   )
 }
