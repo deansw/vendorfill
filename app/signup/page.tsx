@@ -1,4 +1,5 @@
 "use client"
+
 import { useMemo, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation"
@@ -6,7 +7,8 @@ import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Signup() {
-  const supabase = createClient()
+  // ✅ Create once
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
   const [email, setEmail] = useState("")
@@ -31,22 +33,27 @@ export default function Signup() {
 
     const cleanEmail = email.trim()
 
+    if (!canSubmit) return
+
     setLoading(true)
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
 
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/login`,
+        // ✅ MUST be callback for confirmation flow
+        emailRedirectTo: `${siteUrl}/auth/callback`,
       },
     })
 
     if (error) {
-      const msg = error.message.toLowerCase()
+      const msg = (error.message || "").toLowerCase()
       if (msg.includes("already")) {
         setError("That email is already registered. Try logging in instead.")
       } else {
-        setError(error.message)
+        setError(error.message || "Signup failed.")
       }
       setLoading(false)
       return
@@ -54,11 +61,14 @@ export default function Signup() {
 
     setSuccess(true)
 
-    if (!data.user) {
-      setMessage("Account created! Check your email to confirm, then log in.")
-    } else {
-      setMessage("Account created! You can log in now.")
-    }
+    // ✅ If confirmations are ON, they must check email. If OFF, they can login immediately.
+    // We'll show the safe message by default.
+    const hasSession = !!data.session
+    setMessage(
+      hasSession
+        ? "Account created! You can log in now."
+        : "Account created! Check your email to confirm your account, then log in."
+    )
 
     setLoading(false)
   }
@@ -76,7 +86,6 @@ export default function Signup() {
           textAlign: "left",
         }}
       >
-        {/* SUCCESS STATE */}
         {success ? (
           <div style={{ textAlign: "center" }}>
             <p
@@ -95,7 +104,6 @@ export default function Signup() {
             </PrimaryCtaButton>
           </div>
         ) : (
-          /* SIGNUP FORM */
           <div style={{ display: "grid", gap: 16 }}>
             <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
               Email
@@ -179,4 +187,5 @@ export default function Signup() {
     </PageShell>
   )
 }
+
 
