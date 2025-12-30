@@ -1,13 +1,12 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation"
+import { createClient } from "@/utils/supabase/client"
 import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Signup() {
-  // ✅ Create once
   const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
@@ -19,12 +18,8 @@ export default function Signup() {
   const [message, setMessage] = useState("")
   const [success, setSuccess] = useState(false)
 
-  const canSubmit = useMemo(() => {
-    if (!email.trim()) return false
-    if (!password || password.length < 6) return false
-    if (password !== confirmPassword) return false
-    return true
-  }, [email, password, confirmPassword])
+  const canSubmit =
+    email.trim().length > 0 && password.length >= 6 && password === confirmPassword
 
   const handleSignup = async () => {
     setError("")
@@ -33,37 +28,56 @@ export default function Signup() {
 
     const cleanEmail = email.trim()
 
-    if (!canSubmit) return
+    if (!cleanEmail) {
+      setError("Please enter an email.")
+      return
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.")
+      return
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.")
+      return
+    }
 
     setLoading(true)
 
+    // ✅ Use your production domain when set; fallback to current origin for local/dev.
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
 
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
-        // ✅ MUST be callback for confirmation flow
+        // ✅ This MUST be /auth/callback so your callback can process the code/token.
         emailRedirectTo: `${siteUrl}/auth/callback`,
       },
     })
 
     if (error) {
-      const msg = (error.message || "").toLowerCase()
-      if (msg.includes("already")) {
+      console.error("Supabase signUp error:", error)
+      const pretty =
+        (error as any)?.message ||
+        (error as any)?.error_description ||
+        JSON.stringify(error, Object.getOwnPropertyNames(error)) ||
+        String(error)
+
+      if (pretty.toLowerCase().includes("already")) {
         setError("That email is already registered. Try logging in instead.")
       } else {
-        setError(error.message || "Signup failed.")
+        setError(pretty)
       }
+
       setLoading(false)
       return
     }
 
-    setSuccess(true)
-
-    // ✅ If confirmations are ON, they must check email. If OFF, they can login immediately.
-    // We'll show the safe message by default.
+    // With email confirmations ON, session is usually null until confirmed.
+    // With confirmations OFF, session may exist immediately.
     const hasSession = !!data.session
+
+    setSuccess(true)
     setMessage(
       hasSession
         ? "Account created! You can log in now."
@@ -187,5 +201,3 @@ export default function Signup() {
     </PageShell>
   )
 }
-
-
