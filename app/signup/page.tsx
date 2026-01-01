@@ -1,3 +1,4 @@
+// app/signup/page.tsx
 "use client"
 
 import { useMemo, useState } from "react"
@@ -43,20 +44,23 @@ export default function Signup() {
 
     setLoading(true)
 
-    // ✅ Use your production domain when set; fallback to current origin for local/dev.
+    // ✅ Canonical domain: use env var if set, otherwise fallback to current origin.
+    // Make sure NEXT_PUBLIC_SITE_URL is set to: https://www.vendorfill.com
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
 
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
-        // ✅ This MUST be /auth/callback so your callback can process the code/token.
+        // ✅ MUST be callback for confirmation flow
         emailRedirectTo: `${siteUrl}/auth/callback`,
       },
     })
 
     if (error) {
       console.error("Supabase signUp error:", error)
+
+      // Some Supabase errors have non-enumerable fields; this prints them.
       const pretty =
         (error as any)?.message ||
         (error as any)?.error_description ||
@@ -74,7 +78,6 @@ export default function Signup() {
     }
 
     // With email confirmations ON, session is usually null until confirmed.
-    // With confirmations OFF, session may exist immediately.
     const hasSession = !!data.session
 
     setSuccess(true)
@@ -100,6 +103,7 @@ export default function Signup() {
           textAlign: "left",
         }}
       >
+        {/* SUCCESS STATE */}
         {success ? (
           <div style={{ textAlign: "center" }}>
             <p
@@ -118,6 +122,7 @@ export default function Signup() {
             </PrimaryCtaButton>
           </div>
         ) : (
+          /* SIGNUP FORM */
           <div style={{ display: "grid", gap: 16 }}>
             <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
               Email
@@ -126,6 +131,7 @@ export default function Signup() {
                 placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 style={{
                   width: "100%",
                   marginTop: 8,
@@ -145,6 +151,7 @@ export default function Signup() {
                 placeholder="At least 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 style={{
                   width: "100%",
                   marginTop: 8,
@@ -164,6 +171,7 @@ export default function Signup() {
                 placeholder="Re-enter password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
                 style={{
                   width: "100%",
                   marginTop: 8,
