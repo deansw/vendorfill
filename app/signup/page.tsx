@@ -1,4 +1,3 @@
-// app/signup/page.tsx
 "use client"
 
 import { useMemo, useState } from "react"
@@ -8,6 +7,7 @@ import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Signup() {
+  // Create Supabase client once
   const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
@@ -20,7 +20,9 @@ export default function Signup() {
   const [success, setSuccess] = useState(false)
 
   const canSubmit =
-    email.trim().length > 0 && password.length >= 6 && password === confirmPassword
+    email.trim().length > 0 &&
+    password.length >= 6 &&
+    password === confirmPassword
 
   const handleSignup = async () => {
     setError("")
@@ -44,23 +46,20 @@ export default function Signup() {
 
     setLoading(true)
 
-    // ✅ Canonical domain: use env var if set, otherwise fallback to current origin.
-    // Make sure NEXT_PUBLIC_SITE_URL is set to: https://www.vendorfill.com
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    // ✅ HARD-CODE canonical domain to prevent hash stripping
+    const EMAIL_REDIRECT_TO = "https://www.vendorfill.com/auth/callback"
 
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
-        // ✅ MUST be callback for confirmation flow
-        emailRedirectTo: `${siteUrl}/auth/callback`,
+        emailRedirectTo: EMAIL_REDIRECT_TO,
       },
     })
 
     if (error) {
       console.error("Supabase signUp error:", error)
 
-      // Some Supabase errors have non-enumerable fields; this prints them.
       const pretty =
         (error as any)?.message ||
         (error as any)?.error_description ||
@@ -77,7 +76,7 @@ export default function Signup() {
       return
     }
 
-    // With email confirmations ON, session is usually null until confirmed.
+    // Email confirmations ON → session usually null until confirmed
     const hasSession = !!data.session
 
     setSuccess(true)
@@ -103,7 +102,6 @@ export default function Signup() {
           textAlign: "left",
         }}
       >
-        {/* SUCCESS STATE */}
         {success ? (
           <div style={{ textAlign: "center" }}>
             <p
@@ -122,7 +120,6 @@ export default function Signup() {
             </PrimaryCtaButton>
           </div>
         ) : (
-          /* SIGNUP FORM */
           <div style={{ display: "grid", gap: 16 }}>
             <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
               Email
