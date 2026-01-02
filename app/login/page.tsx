@@ -1,44 +1,59 @@
 "use client"
-import { useState } from "react"
+
+import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
-import { useRouter } from "next/navigation"
 import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Login() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const router = useRouter()
+  const params = useSearchParams()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const router = useRouter()
+  const [notice, setNotice] = useState("")
+
+  // ✅ Show success message after email confirmation redirect
+  useEffect(() => {
+    const confirmed = params.get("confirmed")
+    if (confirmed === "1") {
+      setNotice("✅ Email verified successfully. You can log in now.")
+    }
+  }, [params])
 
   const handleLogin = async () => {
     setLoading(true)
     setError("")
+    setNotice("")
+
+    const cleanEmail = email.trim()
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: cleanEmail,
       password,
     })
 
     if (error) {
-      if (error.message.toLowerCase().includes("2fa")) {
-        setError("2FA required — check your authenticator app.")
-      } else {
-        setError(error.message)
-      }
+      setError(error.message)
       setLoading(false)
       return
     }
 
-    if (data.user) router.push("/dashboard")
+    if (data.user) {
+      router.push("/dashboard")
+    } else {
+      setError("Login failed. Please try again.")
+    }
+
     setLoading(false)
   }
 
   return (
-    <PageShell title="Login" subtitle="Access your dashboard and uploads.">
+    <PageShell title="Login" subtitle="Sign in to continue to your dashboard.">
       <div
         style={{
           background: "white",
@@ -50,6 +65,40 @@ export default function Login() {
           textAlign: "left",
         }}
       >
+        {notice && (
+          <div
+            style={{
+              background: "#ecfdf5",
+              border: "1px solid #bbf7d0",
+              color: "#166534",
+              padding: "14px 16px",
+              borderRadius: 14,
+              fontWeight: 800,
+              textAlign: "center",
+              marginBottom: 16,
+            }}
+          >
+            {notice}
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              background: "#fff1f2",
+              border: "1px solid #fecdd3",
+              color: "#9f1239",
+              padding: "14px 16px",
+              borderRadius: 14,
+              fontWeight: 800,
+              textAlign: "center",
+              marginBottom: 16,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <div style={{ display: "grid", gap: 16 }}>
           <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
             Email
@@ -58,6 +107,7 @@ export default function Login() {
               placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               style={{
                 width: "100%",
                 marginTop: 8,
@@ -74,9 +124,10 @@ export default function Login() {
             Password
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="Your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               style={{
                 width: "100%",
                 marginTop: 8,
@@ -89,27 +140,16 @@ export default function Login() {
             />
           </label>
 
-          {error && (
-            <p style={{ color: "#dc2626", fontWeight: 700, textAlign: "center" }}>
-              {error}
-            </p>
-          )}
-
-          <div style={{ marginTop: 6 }}>
-            <PrimaryCtaButton onClick={handleLogin} disabled={loading}>
-              {loading ? "Logging in..." : "Login →"}
-            </PrimaryCtaButton>
-          </div>
-
-          <div style={{ marginTop: 10, textAlign: "center", color: "#64748b", fontSize: 16 }}>
-            <a href="/forgot-password" style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}>
-              Forgot password?
-            </a>
-          </div>
+          <PrimaryCtaButton onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login →"}
+          </PrimaryCtaButton>
 
           <div style={{ textAlign: "center", color: "#64748b", fontSize: 16 }}>
             No account?{" "}
-            <a href="/signup" style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}>
+            <a
+              href="/signup"
+              style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}
+            >
               Sign up
             </a>
           </div>
