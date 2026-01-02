@@ -1,36 +1,49 @@
 "use client"
-import { useState } from "react"
-import { createClient } from "@/utils/supabase/client"
+
+import { useMemo, useState } from "react"
 import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
+import { createClient } from "@/utils/supabase/client"
 
-export default function ForgotPassword() {
-  const supabase = createClient()
+export default function ForgotPasswordPage() {
+  const supabase = useMemo(() => createClient(), [])
+
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
   const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
 
-  const handleReset = async () => {
-    setLoading(true)
+  const handleSend = async () => {
     setError("")
     setMessage("")
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const cleanEmail = email.trim()
+    if (!cleanEmail) {
+      setError("Please enter your email.")
+      return
+    }
+
+    setLoading(true)
+
+    // ✅ Always send them back to your reset page on the canonical domain
+    const RESET_REDIRECT_TO = "https://www.vendorfill.com/reset-password"
+
+    const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+      redirectTo: RESET_REDIRECT_TO,
     })
 
     if (error) {
       setError(error.message)
-    } else {
-      setMessage("Password reset email sent. Check your inbox.")
+      setLoading(false)
+      return
     }
 
+    setMessage("✅ Check your email for a password reset link.")
     setLoading(false)
   }
 
   return (
-    <PageShell title="Forgot Password" subtitle="We'll email you a secure reset link.">
+    <PageShell title="Forgot Password" subtitle="We’ll email you a link to reset your password.">
       <div
         style={{
           background: "white",
@@ -42,44 +55,72 @@ export default function ForgotPassword() {
           textAlign: "left",
         }}
       >
-        <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
-          Email address
-          <input
-            type="email"
-            placeholder="you@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+        {message && (
+          <div
             style={{
-              width: "100%",
-              marginTop: 8,
-              padding: "18px",
+              background: "#ecfdf5",
+              border: "1px solid #bbf7d0",
+              color: "#166534",
+              padding: "14px 16px",
               borderRadius: 14,
-              border: "2px solid #e2e8f0",
-              fontSize: 18,
-              outline: "none",
+              fontWeight: 800,
+              textAlign: "center",
+              marginBottom: 16,
             }}
-          />
-        </label>
+          >
+            {message}
+          </div>
+        )}
 
         {error && (
-          <p style={{ marginTop: 12, color: "#dc2626", fontWeight: 700, textAlign: "center" }}>
+          <div
+            style={{
+              background: "#fff1f2",
+              border: "1px solid #fecdd3",
+              color: "#9f1239",
+              padding: "14px 16px",
+              borderRadius: 14,
+              fontWeight: 800,
+              textAlign: "center",
+              marginBottom: 16,
+            }}
+          >
             {error}
-          </p>
+          </div>
         )}
 
-        {message && (
-          <p style={{ marginTop: 12, color: "#16a34a", fontWeight: 700, textAlign: "center" }}>
-            {message}
-          </p>
-        )}
+        <div style={{ display: "grid", gap: 16 }}>
+          <label style={{ fontSize: 18, fontWeight: 800, color: "#334155" }}>
+            Email
+            <input
+              type="email"
+              placeholder="you@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              style={{
+                width: "100%",
+                marginTop: 8,
+                padding: "18px",
+                borderRadius: 14,
+                border: "2px solid #e2e8f0",
+                fontSize: 18,
+                outline: "none",
+              }}
+            />
+          </label>
 
-        <div style={{ marginTop: 24 }}>
-          <PrimaryCtaButton onClick={handleReset} disabled={loading || !email}>
+          <PrimaryCtaButton onClick={handleSend} disabled={loading}>
             {loading ? "Sending..." : "Send Reset Link →"}
           </PrimaryCtaButton>
+
+          <div style={{ textAlign: "center", color: "#64748b", fontSize: 16 }}>
+            <a href="/login" style={{ color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
+              Back to Login →
+            </a>
+          </div>
         </div>
       </div>
     </PageShell>
   )
 }
-
