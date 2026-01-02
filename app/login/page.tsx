@@ -17,10 +17,9 @@ function LoginInner() {
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
 
-  // ✅ Show success message after email confirmation redirect
+  // ✅ Success banner after email confirmation
   useEffect(() => {
-    const confirmed = params.get("confirmed")
-    if (confirmed === "1") {
+    if (params.get("confirmed") === "1") {
       setNotice("✅ Email verified successfully. You can log in now.")
     }
   }, [params])
@@ -28,11 +27,9 @@ function LoginInner() {
   const handleLogin = async () => {
     setLoading(true)
     setError("")
-    // Don’t wipe notice; user may still want to see it
-    const cleanEmail = email.trim()
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
+      email: email.trim(),
       password,
     })
 
@@ -143,6 +140,17 @@ function LoginInner() {
             {loading ? "Logging in..." : "Login →"}
           </PrimaryCtaButton>
 
+          {/* Forgot password */}
+          <div style={{ textAlign: "center", marginTop: 8 }}>
+            <a
+              href="/forgot-password"
+              style={{ color: "#2563eb", fontWeight: 800, textDecoration: "none" }}
+            >
+              Forgot password?
+            </a>
+          </div>
+
+          {/* Signup */}
           <div style={{ textAlign: "center", color: "#64748b", fontSize: 16 }}>
             No account?{" "}
             <a
