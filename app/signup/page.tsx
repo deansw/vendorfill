@@ -7,7 +7,6 @@ import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
 export default function Signup() {
-  // Create Supabase client once
   const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
@@ -31,23 +30,17 @@ export default function Signup() {
 
     const cleanEmail = email.trim()
 
-    if (!cleanEmail) {
-      setError("Please enter an email.")
-      return
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.")
-      return
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.")
-      return
-    }
+    if (!cleanEmail) return setError("Please enter an email.")
+    if (password.length < 6) return setError("Password must be at least 6 characters.")
+    if (password !== confirmPassword) return setError("Passwords do not match.")
 
     setLoading(true)
 
-    // ✅ HARD-CODE canonical domain to prevent hash stripping
-    const EMAIL_REDIRECT_TO = "https://www.vendorfill.com/auth/callback"
+    // ✅ Always use canonical domain (no redirects)
+    const SITE_URL = "https://www.vendorfill.com"
+
+    // ✅ Redirect users to Login after they click the email link
+    const EMAIL_REDIRECT_TO = `${SITE_URL}/login?confirmed=1`
 
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
@@ -66,24 +59,23 @@ export default function Signup() {
         JSON.stringify(error, Object.getOwnPropertyNames(error)) ||
         String(error)
 
-      if (pretty.toLowerCase().includes("already")) {
-        setError("That email is already registered. Try logging in instead.")
-      } else {
-        setError(pretty)
-      }
+      setError(pretty.toLowerCase().includes("already")
+        ? "That email is already registered. Try logging in instead."
+        : pretty
+      )
 
       setLoading(false)
       return
     }
 
-    // Email confirmations ON → session usually null until confirmed
-    const hasSession = !!data.session
-
     setSuccess(true)
+
+    // With confirmations ON, session usually null until confirmed
+    const hasSession = !!data.session
     setMessage(
       hasSession
         ? "Account created! You can log in now."
-        : "Account created! Check your email to confirm your account, then log in."
+        : "Account created! Check your email to confirm your account. After confirming, you’ll be sent to the login page."
     )
 
     setLoading(false)
@@ -104,14 +96,7 @@ export default function Signup() {
       >
         {success ? (
           <div style={{ textAlign: "center" }}>
-            <p
-              style={{
-                color: "#16a34a",
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 24,
-              }}
-            >
+            <p style={{ color: "#16a34a", fontSize: 18, fontWeight: 800, marginBottom: 24 }}>
               {message}
             </p>
 
@@ -182,9 +167,7 @@ export default function Signup() {
             </label>
 
             {error && (
-              <p style={{ color: "#dc2626", fontWeight: 800, textAlign: "center" }}>
-                {error}
-              </p>
+              <p style={{ color: "#dc2626", fontWeight: 800, textAlign: "center" }}>{error}</p>
             )}
 
             <PrimaryCtaButton onClick={handleSignup} disabled={loading || !canSubmit}>
@@ -193,10 +176,7 @@ export default function Signup() {
 
             <div style={{ textAlign: "center", color: "#64748b", fontSize: 16 }}>
               Already have an account?{" "}
-              <a
-                href="/login"
-                style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}
-              >
+              <a href="/login" style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}>
                 Login
               </a>
             </div>
