@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import PageShell from "@/components/PageShell"
 import PrimaryCtaButton from "@/components/PrimaryCtaButton"
 
-export default function Login() {
+function LoginInner() {
   const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
   const params = useSearchParams()
@@ -28,8 +28,7 @@ export default function Login() {
   const handleLogin = async () => {
     setLoading(true)
     setError("")
-    setNotice("")
-
+    // Don’t wipe notice; user may still want to see it
     const cleanEmail = email.trim()
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -156,5 +155,13 @@ export default function Login() {
         </div>
       </div>
     </PageShell>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   )
 }
