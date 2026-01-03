@@ -1,95 +1,112 @@
-// app/api/webhook/route.ts — FINAL WITH MOCKPROFILE DEFINED + OPENAI
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
-import { PDFDocument } from "pdf-lib"
-import OpenAI from "openai"
+import { createClient } from "@supabase/supabase-js"
+
+export const runtime = "nodejs"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
-
-// Mock profile — defined here so no undefined error
-const mockProfile = {
-  companyName: "Acme Corp",
-  legalName: "Acme Corporation Inc.",
-  taxId: "12-3456789",
-  entityType: "C-Corp",
-  address: "123 Main St, San Francisco, CA 94105",
-  phone: "(555) 123-4567",
-  bankAccount: "1234567890",
-  bankRouting: "021000021",
-  accountingEmail: "accounting@acme.com",
-  salesEmail: "sales@acme.com",
+// ✅ MUST match the same mapping
+const PRICE_TO_PLAN: Record<string, { plan: string; monthly_limit: number }> = {
+  "price_STARTER_ID_HERE": { plan: "starter", monthly_limit: 5 },
+  "price_PRO_ID_HERE": { plan: "pro", monthly_limit: 25 },
+  "price_BUSINESS_ID_HERE": { plan: "business", monthly_limit: 75 },
+  "price_UNLIMITED_ID_HERE": { plan: "unlimited", monthly_limit: -1 },
 }
 
 export async function POST(req: NextRequest) {
-  const sig = req.headers.get("stripe-signature")!
-  const body = await req.text()
-
-  let event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
-  } catch (err: any) {
-    return Response.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
-  }
+    const sig = req.headers.get("stripe-signature")
+    if (!sig) return NextResponse.json({ error: "Missing stripe-signature" }, { status: 400 })
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session
-    const { pdfUrl, fileName } = session.metadata!
-    const customerEmail = session.customer_details?.email || "customer@example.com"
+    const rawBody = await req.text()
 
-    // Download PDF
-    const pdfBytes = await fetch(pdfUrl).then(r => r.arrayBuffer())
-    const pdfDoc = await PDFDocument.load(pdfBytes)
-    const form = pdfDoc.getForm()
-    const fieldNames = form.getFields().map(f => f.getName())
+    const event = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    )
 
-    // OpenAI fills it
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        {
-          role: "user",
-          content: `Fill this vendor form using ONLY the data below.
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-Company Data:
-${JSON.stringify(mockProfile, null, 2)}
-
-Form fields:
-${fieldNames.join("\n")}
-
-Output ONLY valid JSON with field name as key and value as string.
-Never hallucinate. Use "N/A" if unsure.`,
-        },
-      ],
+    const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false },
     })
 
-    const filledText = completion.choices[0].message.content!
-    const filledData = JSON.parse(filledText)
+    // We update entitlements when subscription becomes active
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
+      const obj: any = event.data.object
 
-    // Fill the PDF
-    Object.entries(filledData).forEach(([name, value]) => {
-      try {
-        const field = form.getField(name)
-        if (field.constructor.name.includes("TextField")) {
-          ;(field as any).setText(String(value))
-        } else if (field.constructor.name.includes("CheckBox")) {
-          if (String(value).toLowerCase().includes("yes")) (field as any).check()
+      let subscription: Stripe.Subscription | null = null
+      let customerId: string | null = null
+      let userId: string | null = null
+
+      if (event.type === "checkout.session.completed") {
+        customerId = obj.customer
+        userId = obj.metadata?.supabase_user_id || null
+        if (obj.subscription) {
+          subscription = await stripe.subscriptions.retrieve(obj.subscription)
         }
-      } catch (e) {}
-    })
+      } else {
+        subscription = obj as Stripe.Subscription
+        customerId = (subscription.customer as string) || null
+      }
 
-    form.flatten()
-    const filledPdfBytes = await pdfDoc.save()
-    const base64Filled = Buffer.from(filledPdfBytes).toString("base64")
+      if (!userId && customerId) {
+        // fallback: find user via entitlements.customer_id
+        const { data: row } = await supabaseAdmin
+          .from("user_entitlements")
+          .select("user_id")
+          .eq("stripe_customer_id", customerId)
+          .single()
+        userId = (row?.user_id as string) || null
+      }
 
-    // EMAIL DELIVERY (add Resend later)
-    console.log("Filled PDF ready — send via email")
-    console.log(`data:application/pdf;base64,${base64Filled}`)
+      if (subscription && userId) {
+        const priceId = subscription.items.data?.[0]?.price?.id
+        const map = priceId ? PRICE_TO_PLAN[priceId] : null
+
+        if (map) {
+          await supabaseAdmin
+            .from("user_entitlements")
+            .update({
+              plan: map.plan,
+              monthly_limit: map.monthly_limit,
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscription.id,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", userId)
+        }
+      }
+    }
+
+    // Handle cancel -> revert to free (no paid uploads)
+    if (event.type === "customer.subscription.deleted") {
+      const sub = event.data.object as Stripe.Subscription
+      const customerId = sub.customer as string
+
+      await supabaseAdmin
+        .from("user_entitlements")
+        .update({
+          plan: "free",
+          monthly_limit: 0,
+          stripe_subscription_id: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_customer_id", customerId)
+    }
+
+    return NextResponse.json({ received: true })
+  } catch (e: any) {
+    console.error("webhook error:", e)
+    return NextResponse.json({ error: e?.message || "Webhook error" }, { status: 400 })
   }
-
-  return Response.json({ received: true })
 }
