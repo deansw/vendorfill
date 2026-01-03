@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import AppNav from "@/components/AppNav"
+import AppNav from "@/app/components/AppNav"
 import { createClient } from "@/utils/supabase/client"
 
 const PLANS = [
@@ -18,9 +18,10 @@ export default function BillingPage() {
   const [loadingId, setLoadingId] = useState("")
   const [error, setError] = useState("")
   const [currentPlan, setCurrentPlan] = useState<string>("free")
-  const [hasCustomer, setHasCustomer] = useState<boolean>(false)
+  const [stripeCustomerId, setStripeCustomerId] = useState<string>("")
+  const [stripeSubscriptionId, setStripeSubscriptionId] = useState<string>("")
   const [userEmail, setUserEmail] = useState<string>("")
-  const [isAuthed, setIsAuthed] = useState<boolean>(true)
+  const [authed, setAuthed] = useState<boolean>(true)
 
   useEffect(() => {
     const load = async () => {
@@ -28,28 +29,27 @@ export default function BillingPage() {
 
       const { data: userRes, error: userErr } = await supabase.auth.getUser()
       if (userErr || !userRes.user) {
-        setIsAuthed(false)
+        setAuthed(false)
         return
       }
-
-      setIsAuthed(true)
+      setAuthed(true)
       setUserEmail(userRes.user.email ?? "")
 
       const { data: ent, error: entErr } = await supabase
         .from("user_entitlements")
-        .select("plan, stripe_customer_id")
+        .select("plan, stripe_customer_id, stripe_subscription_id")
         .eq("user_id", userRes.user.id)
         .maybeSingle()
 
       if (entErr) {
-        // If this errors, you’ll stay in free mode and won’t see Manage Billing
         console.error("Entitlements load error:", entErr)
         setError("Could not load your billing status.")
         return
       }
 
       setCurrentPlan(ent?.plan || "free")
-      setHasCustomer(!!ent?.stripe_customer_id)
+      setStripeCustomerId(ent?.stripe_customer_id || "")
+      setStripeSubscriptionId(ent?.stripe_subscription_id || "")
     }
 
     load()
@@ -74,7 +74,6 @@ export default function BillingPage() {
     })
 
     const payload = await res.json().catch(() => ({}))
-
     if (!res.ok || !payload?.url) {
       setError(payload?.error || `Checkout failed (status ${res.status}).`)
       setLoadingId("")
@@ -99,7 +98,6 @@ export default function BillingPage() {
     })
 
     const payload = await res.json().catch(() => ({}))
-
     if (!res.ok || !payload?.url) {
       setError(payload?.error || `Could not open billing portal (status ${res.status}).`)
       return
@@ -109,7 +107,7 @@ export default function BillingPage() {
   }
 
   const currentRank = RANK[currentPlan] ?? 0
-  const showManageBilling = currentPlan !== "free" || hasCustomer
+  const showManageBilling = currentPlan !== "free" || !!stripeCustomerId || !!stripeSubscriptionId
 
   return (
     <>
@@ -120,7 +118,7 @@ export default function BillingPage() {
             Billing
           </h1>
 
-          {!isAuthed ? (
+          {!authed ? (
             <p style={{ marginTop: 14, textAlign: "center", color: "#64748b", fontSize: 18, fontWeight: 800 }}>
               Please log in to manage your subscription.
             </p>
