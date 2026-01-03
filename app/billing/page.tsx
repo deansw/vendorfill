@@ -5,10 +5,10 @@ import AppNav from "@/app/components/AppNav"
 import { createClient } from "@/utils/supabase/client"
 
 const PLANS = [
-  { name: "Starter", docs: "5 documents / month", price: "$19.99", priceId: "price_STARTER_ID_HERE" },
-  { name: "Pro", docs: "25 documents / month", price: "$49.99", priceId: "price_PRO_ID_HERE" },
-  { name: "Business", docs: "75 documents / month", price: "$139.99", priceId: "price_BUSINESS_ID_HERE" },
-  { name: "Unlimited", docs: "Unlimited documents / month", price: "$279.99", priceId: "price_UNLIMITED_ID_HERE" },
+  { name: "Starter", docs: "5 documents / month", price: "$19.99", priceId: "price_1SaN5TLUnMjiPKi9r0UnyAYM" },
+  { name: "Pro", docs: "25 documents / month", price: "$49.99", priceId: "price_1SlKH6LUnMjiPKi9ozcPR91i" },
+  { name: "Business", docs: "75 documents / month", price: "$139.99", priceId: "price_1SlKHdLUnMjiPKi9QaqXhaEZ" },
+  { name: "Unlimited", docs: "Unlimited documents / month", price: "$279.99", priceId: "price_1SlKHvLUnMjiPKi9RacDSNMf" },
 ]
 
 export default function BillingPage() {
