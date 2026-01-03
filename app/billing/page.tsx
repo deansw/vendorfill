@@ -1,4 +1,4 @@
-import AppNav from "@/app/components/AppNav"
+import AppNav from "@/components/AppNav"
 
 export default function BillingPage() {
   const plans = [
