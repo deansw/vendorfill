@@ -19,19 +19,36 @@ export default function BillingPage() {
   const [error, setError] = useState("")
   const [currentPlan, setCurrentPlan] = useState<string>("free")
   const [hasCustomer, setHasCustomer] = useState<boolean>(false)
+  const [userEmail, setUserEmail] = useState<string>("")
+  const [isAuthed, setIsAuthed] = useState<boolean>(true)
 
   useEffect(() => {
     const load = async () => {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-      if (!token) return
+      setError("")
 
-      const { data: ent } = await supabase
+      const { data: userRes, error: userErr } = await supabase.auth.getUser()
+      if (userErr || !userRes.user) {
+        setIsAuthed(false)
+        return
+      }
+
+      setIsAuthed(true)
+      setUserEmail(userRes.user.email ?? "")
+
+      const { data: ent, error: entErr } = await supabase
         .from("user_entitlements")
-        .select("plan,stripe_customer_id")
-        .single()
+        .select("plan, stripe_customer_id")
+        .eq("user_id", userRes.user.id)
+        .maybeSingle()
 
-      if (ent?.plan) setCurrentPlan(ent.plan)
+      if (entErr) {
+        // If this errors, you’ll stay in free mode and won’t see Manage Billing
+        console.error("Entitlements load error:", entErr)
+        setError("Could not load your billing status.")
+        return
+      }
+
+      setCurrentPlan(ent?.plan || "free")
       setHasCustomer(!!ent?.stripe_customer_id)
     }
 
@@ -92,75 +109,59 @@ export default function BillingPage() {
   }
 
   const currentRank = RANK[currentPlan] ?? 0
+  const showManageBilling = currentPlan !== "free" || hasCustomer
 
   return (
     <>
       <AppNav />
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(to bottom, #f8fafc, #ffffff)",
-          paddingTop: 140,
-          paddingBottom: 80,
-        }}
-      >
+      <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom, #f8fafc, #ffffff)", paddingTop: 140, paddingBottom: 80 }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", padding: "0 24px" }}>
           <h1 style={{ fontSize: 52, fontWeight: 950, color: "#0f172a", textAlign: "center" }}>
             Billing
           </h1>
 
-          <p style={{ marginTop: 14, textAlign: "center", color: "#64748b", fontSize: 18, fontWeight: 800 }}>
-            Current plan: <span style={{ color: "#0f172a" }}>{currentPlan}</span>
-          </p>
+          {!isAuthed ? (
+            <p style={{ marginTop: 14, textAlign: "center", color: "#64748b", fontSize: 18, fontWeight: 800 }}>
+              Please log in to manage your subscription.
+            </p>
+          ) : (
+            <>
+              <p style={{ marginTop: 14, textAlign: "center", color: "#64748b", fontSize: 18, fontWeight: 800 }}>
+                Signed in as <span style={{ color: "#0f172a" }}>{userEmail || "your account"}</span> — Current plan:{" "}
+                <span style={{ color: "#0f172a" }}>{currentPlan}</span>
+              </p>
 
-          {(currentPlan !== "free" || hasCustomer) && (
-            <div style={{ textAlign: "center", marginTop: 14 }}>
-              <button
-                onClick={openPortal}
-                style={{
-                  padding: "12px 18px",
-                  borderRadius: 14,
-                  fontWeight: 950,
-                  border: "1px solid #e2e8f0",
-                  background: "white",
-                  cursor: "pointer",
-                  boxShadow: "0 10px 26px rgba(15, 23, 42, 0.06)",
-                }}
-              >
-                Manage Billing →
-              </button>
-            </div>
+              {showManageBilling && (
+                <div style={{ textAlign: "center", marginTop: 14 }}>
+                  <button
+                    onClick={openPortal}
+                    style={{
+                      padding: "12px 18px",
+                      borderRadius: 14,
+                      fontWeight: 950,
+                      border: "1px solid #e2e8f0",
+                      background: "white",
+                      cursor: "pointer",
+                      boxShadow: "0 10px 26px rgba(15, 23, 42, 0.06)",
+                    }}
+                  >
+                    Manage Billing →
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {error && (
-            <div
-              style={{
-                marginTop: 16,
-                background: "#fff1f2",
-                border: "1px solid #fecdd3",
-                color: "#9f1239",
-                padding: "12px 14px",
-                borderRadius: 14,
-                fontWeight: 900,
-                textAlign: "center",
-              }}
-            >
+            <div style={{ marginTop: 16, background: "#fff1f2", border: "1px solid #fecdd3", color: "#9f1239", padding: "12px 14px", borderRadius: 14, fontWeight: 900, textAlign: "center" }}>
               {error}
             </div>
           )}
 
-          <div
-            style={{
-              marginTop: 28,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-              gap: 16,
-            }}
-          >
+          <div style={{ marginTop: 28, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }}>
             {PLANS.map((p) => {
               const planRank = RANK[p.key]
               const isLowerThanCurrent = currentRank > 0 && planRank < currentRank
-              const disabled = isLowerThanCurrent || loadingId === p.priceId
 
               return (
                 <div
@@ -185,7 +186,7 @@ export default function BillingPage() {
                   ) : (
                     <button
                       onClick={() => startCheckout(p.priceId)}
-                      disabled={disabled}
+                      disabled={loadingId === p.priceId}
                       style={{
                         marginTop: 14,
                         width: "100%",
@@ -195,9 +196,9 @@ export default function BillingPage() {
                         color: "white",
                         background: "linear-gradient(to right, #2563eb, #3b82f6)",
                         border: "none",
-                        cursor: disabled ? "not-allowed" : "pointer",
+                        cursor: "pointer",
                         boxShadow: "0 10px 26px rgba(59, 130, 246, 0.25)",
-                        opacity: disabled ? 0.7 : 1,
+                        opacity: loadingId === p.priceId ? 0.7 : 1,
                       }}
                     >
                       {loadingId === p.priceId ? "Redirecting..." : `Subscribe to ${p.name} →`}
