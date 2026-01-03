@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import AppNav from "@/app/components/AppNav"
+import AppNav from "@/components/AppNav"
 import { createClient } from "@/utils/supabase/client"
 
 const PLANS = [
