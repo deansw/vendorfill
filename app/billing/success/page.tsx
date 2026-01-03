@@ -1,4 +1,4 @@
-import AppNav from "@/app/components/AppNav"
+import AppNav from "@/components/AppNav"
 import Link from "next/link"
 
 export default function BillingSuccessPage() {
