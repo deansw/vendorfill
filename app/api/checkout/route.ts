@@ -11,16 +11,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // ✅ PASTE your 4 Stripe Price IDs here:
 const PRICE_TO_PLAN: Record<string, { plan: string; monthly_limit: number }> = {
   // Starter (5/mo) — $19.99
-  "price_STARTER_ID_HERE": { plan: "starter", monthly_limit: 5 },
+  "price_1SaN5TLUnMjiPKi9r0UnyAYM": { plan: "starter", monthly_limit: 5 },
 
   // Pro (25/mo) — $49.99
-  "price_PRO_ID_HERE": { plan: "pro", monthly_limit: 25 },
+  "price_1SlKH6LUnMjiPKi9ozcPR91iE": { plan: "pro", monthly_limit: 25 },
 
   // Business (75/mo) — $139.99
-  "price_BUSINESS_ID_HERE": { plan: "business", monthly_limit: 75 },
+  "price_1SlKHdLUnMjiPKi9QaqXhaEZ": { plan: "business", monthly_limit: 75 },
 
   // Unlimited — $279.99
-  "price_UNLIMITED_ID_HERE": { plan: "unlimited", monthly_limit: -1 },
+  "price_1SlKHvLUnMjiPKi9RacDSNMf": { plan: "unlimited", monthly_limit: -1 },
 }
 
 export async function POST(req: NextRequest) {
